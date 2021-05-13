@@ -130,6 +130,14 @@ converting_to_relative_to_reference <- function(quant_data,
                      value.name="Abundance")
    setkey(quant_data, PlexID, ReporterIon)
 
+   # add QuantBlock columns if missing
+   if (!("QuantBlock" %in% names(samples))) {
+      samples$QuantBlock <- 1
+   }
+   if (!("QuantBlock" %in% names(references))) {
+      references$QuantBlock <- 1
+   }
+   
    # preparing sample info
    samples <- data.table(samples)
 
