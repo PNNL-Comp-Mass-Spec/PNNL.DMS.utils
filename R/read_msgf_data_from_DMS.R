@@ -12,24 +12,21 @@
 
 #' @export
 read_msms_data_from_DMS <- function(DataPkgNumber) {
-  if (!is.null(DataPkgNumber)) {
-
-    # Fetch job records for data package(s)
-    if (length(DataPkgNumber) > 1) {
-      job_rec_ls <- lapply(DataPkgNumber, get_job_records_by_dataset_package)
-      jobRecords <- Reduce(rbind, job_rec_ls)
-    }
-
-    else {
-      jobRecords <- get_job_records_by_dataset_package(DataPkgNumber)
-    }
-
-    jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
-
-    x <- get_results_for_multiple_jobs.dt(jobRecords)
-    msnid <- convert_msgf_output_to_msnid(x)
-    return(msnid)
+  # Fetch job records for data package(s)
+  if (length(DataPkgNumber) > 1) {
+    job_rec_ls <- lapply(DataPkgNumber, get_job_records_by_dataset_package)
+    jobRecords <- Reduce(rbind, job_rec_ls)
+  } else {
+    jobRecords <- get_job_records_by_dataset_package(DataPkgNumber)
   }
 
+  jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
+  results <- get_results_for_multiple_jobs.dt(jobRecords) 
+  
+  tool <- unique(jobRecords$Tool)
+  pattern <- tool2sufix[[tool]]
+  results <- results[[pattern]]
+  msnid <- convert_msgf_output_to_msnid(results)
+  return(msnid)
 }
 
