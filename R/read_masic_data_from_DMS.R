@@ -1,61 +1,55 @@
 #' Reading MASIC results from PNNL's DMS
 #'
-#' @param data_pkg (Numeric or Character vector) containing Data Package ID(s) located in DMS
-#' @param interference_score (logical) read interference score. Default is FALSE.
+#' @param dataPkg (Numeric or Character vector) containing Data Package ID(s) located in DMS
+#' @param interferenceScore (logical) read interference score. Default is FALSE.
 #' @return (data.frame) with reporter ion intensities and other metrics
 #' @importFrom dplyr select
 #' @importFrom plyr llply
 #' @importFrom data.table rbindlist
 #' @export read_masic_data_from_DMS
 
-read_masic_data_from_DMS <- function(data_pkg, interference_score=FALSE){
-   # library("plyr")
-   # library("data.table")
-   
-   # call gc upon exiting this function. All manners of exiting (return, error) count
+read_masic_data_from_DMS <- function(dataPkg, interferenceScore=FALSE, 
+                                     idQuantTable = FALSE){
    on.exit(gc(), add = TRUE)
 
    # Fetch job records for data package(s)
-   if(length(data_pkg) > 1){
-      job_rec_ls <- lapply(data_pkg, get_job_records_by_dataset_package)
-      jobRecords <- Reduce(rbind, job_rec_ls)
+   if(length(dataPkg) > 1){
+      jobRecords <- lapply(dataPkg, get_job_records_by_dataset_package)
+      jobRecords <- Reduce(rbind, jobRecords)
    }else{
-      jobRecords <- get_job_records_by_dataset_package(data_pkg)
+      jobRecords <- get_job_records_by_dataset_package(dataPkg)
    }
 
    jobRecords <- jobRecords[grepl("MASIC", jobRecords$Tool),]
 
-   masicData <- get_results_for_multiple_jobs.dt(jobRecords)
-   gc()
-
-   if (interference_score) {
-     masicStats = llply( jobRecords[["Folder"]],
-                      get_results_for_single_job.dt,
-                      fileNamePttrn="_SICstats.txt",
-                      .progress = "text") %>%
-        rbindlist(.) %>% as.data.frame(.)
-     
-     gc()
-     
-     masicStats <- masicStats[,-2] # Remove redundant Dataset column
-     masicData  <- masicData[,-2] # Remove redundant Dataset column
-
-     # Combine masicData and masicStats
-     masicData <- select(masicData, Dataset, ScanNumber,
-                 starts_with("Ion"), -contains("Resolution"))
-     masicStats <- select(masicStats, Dataset, ScanNumber = FragScanNumber,
-                 contains('InterferenceScore'))
-     masicData <- inner_join(masicData, masicStats)
-     rm(masicStats)
-
-     return(masicData)
+   # select relevant columns from df, drop redundant dataset column (select(-2))
+   masicList <- get_results_for_multiple_jobs.dt(jobRecords)
+   masicData <- masicList[["_ReporterIons.txt"]] %>% 
+      select(-2) %>% 
+      select(Dataset, 
+             ScanNumber, 
+             starts_with("Ion"), 
+             -contains("Resolution"))
+   
+   if (idQuantTable) {
+      quantIDTable <- make_id_to_quant_scan_link_table(masicList[["_ScanStatsEx.txt"]][,-2]) %>%
+         rename(ScanNumber = QuantScan)
+      masicData <- inner_join(quantIDTable, masicData, 
+                         by = c("Dataset", "ScanNumber")) %>%    
+         select(-ScanNumber) %>%    
+         rename(ScanNumber = IDScan)
    }
-   masicData <- masicData[,-2]
-   masicData <- select(masicData, Dataset, ScanNumber,
-                       starts_with("Ion"), -contains("Resolution"))
 
+   if (interferenceScore) {
+      masicStats <- masicList[["_SICstats.txt"]] %>% 
+         select(-2) %>%
+         select(Dataset, 
+                ScanNumber = FragScanNumber, 
+                contains("InterferenceScore"))
+      masicData <- inner_join(masicData, masicStats, 
+                              by = c("Dataset", "ScanNumber"))
+   }
    return(masicData)
-
 }
 
 

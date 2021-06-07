@@ -43,8 +43,19 @@ tool2suffix <- list("MSGFPlus"="_msgfplus_syn.txt",
                     "MSGFPlus_MzML"="_msgfplus_syn.txt",
                     "MSGFPlus_DTARefinery"="_msgfplus_syn.txt",
                     "MSGFDB_DTARefinery"="_msgfdb_syn.txt",
-                    "MASIC_Finnigan"="_ReporterIons.txt",
+                    "MASIC_Finnigan"=c("_ReporterIons.txt","_ScanStatsEx.txt","_SICstats.txt"),
                     "TopPIC" = "_TopPIC_PrSMs.txt")
+
+link_min <- function(scan2,scan3){
+   if (scan3 > scan2){
+      out <- scan3
+   }
+   else {
+      out <- Inf
+   }
+}
+
+link_min_vectorized <- Vectorize(link_min)
 
 get_driver <- function(){
    if(.Platform$OS.type == "unix"){
@@ -356,15 +367,16 @@ get_results_for_multiple_jobs <- function(jobRecords){
 #' @rdname pnnl_dms_utils
 get_results_for_multiple_jobs.dt <- function(jobRecords){
    toolName = unique(jobRecords[["Tool"]])
-   if (length(toolName) > 1){
-      stop("Contains results of more then one tool.")
+   if (length(toolName) > 1) {
+      stop("Contains results of more than one tool.")
    }
-   results = llply(jobRecords[["Folder"]],
-                   get_results_for_single_job.dt,
-                   fileNamePttrn=tool2suffix[[toolName]],
-                   .progress = "text")
-   results.dt <- rbindlist(results)
-   return( as.data.frame(results.dt) ) # in the future I may keep it as data.table
+   result <- list()
+   for (fileNamePttrn in tool2suffix[[toolName]]){
+      result[[fileNamePttrn]] <- llply(jobRecords[["Folder"]], get_results_for_single_job.dt, 
+                                fileNamePttrn = fileNamePttrn, .progress = "text") %>% 
+         rbindlist(., fill = T)    # fill = T to handle differing numbers of columns in ScanStatsEx
+   }
+   return(result)
 }
 
 
