@@ -1,48 +1,13 @@
-# PlexedPiper
+# PlexedPiperDMS
 
-R package used at PNNL for processing isobaric labeling (e.g. TMT) proteomics
-data. The key inputs are:
-* MS/MS identifications from the [MS-GF+ search engine](https://github.com/MSGFPlus/msgfplus)
-* Reporter ion intensities extracted using [MASIC](https://github.com/pnnl-comp-mass-spec/MASIC)
-* Tables outlying study design
-   * table linking dataset to plexes
-   * table linking reporter channels with sample names
-   * table identifying reference within each plex
+A collection of tools for accessing PNNL's Data Management System (DMS).
 
 ## R Installation and Usage
 
 ```R
 if(!require("remotes", quietly = T)) install.packages("remotes")
-remotes::install_github("vladpetyuk/PlexedPiper", build_vignettes = TRUE)
-library(PlexedPiper)
-vignette("tmt_pipeline_v1")
-```
-
-### Example Data
-
-A companion R package with test data based on the MoTrPAC pilot study is available
-here
-* [PlexedPiperTestData](https://github.com/vladpetyuk/PlexedPiperTestData)
-
-## Docker/Linux installation
-
-PlexedPiper can be run within a [Docker Container](https://www.docker.com/resources/what-container)
-* This example `Dockerfile` shows the required system libraries, starting with the base [rocker/TidyVerse](https://hub.docker.com/r/rocker/tidyverse/dockerfile) image
-
-```Dockerfile
-FROM rocker/tidyverse:3.6.1
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
- unixodbc \
- unixodbc-dev \
- freetds-dev \
- freetds-bin \
- tdsodbc \
- libcurl4-openssl-dev \
- libxml2-dev \
- libnetcdf-dev \
- libssl-dev
-RUN R -e 'remotes::install_github("vladpetyuk/PlexedPiper", build_vignettes = TRUE)'
+remotes::install_github("PNNL-Comp-Mass-Spec/PlexedPiperDMS", build_vignettes = TRUE)
+library(PlexedPiperDMS)
 ```
 
 ## MacOS installation
