@@ -1,4 +1,4 @@
-Package: PlexedPiperDMS
+Package: PNNL.DMS.utils
 Type: Package
 Title: Tools for accessing PNNL's Data Management System (DMS).
 Version: 0.1.8

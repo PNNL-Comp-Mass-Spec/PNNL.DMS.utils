@@ -1,4 +1,4 @@
-# PlexedPiperDMS
+# PNNL.DMS.utils
 
 A collection of tools for accessing PNNL's Data Management System (DMS).
 
@@ -6,8 +6,8 @@ A collection of tools for accessing PNNL's Data Management System (DMS).
 
 ```R
 if(!require("remotes", quietly = T)) install.packages("remotes")
-remotes::install_github("PNNL-Comp-Mass-Spec/PlexedPiperDMS", build_vignettes = TRUE)
-library(PlexedPiperDMS)
+remotes::install_github("PNNL-Comp-Mass-Spec/PNNL.DMS.utils")
+library(PNNL.DMS.utils)
 ```
 
 ## MacOS installation
