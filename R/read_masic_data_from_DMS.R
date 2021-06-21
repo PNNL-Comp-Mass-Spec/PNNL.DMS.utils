@@ -4,8 +4,6 @@
 #' @param interferenceScore (logical) read interference score. Default is FALSE.
 #' @return (data.frame) with reporter ion intensities and other metrics
 #' @importFrom dplyr select
-#' @importFrom plyr llply
-#' @importFrom data.table rbindlist
 #' @export read_masic_data_from_DMS
 
 read_masic_data_from_DMS <- function(dataPkg, interferenceScore=FALSE, 

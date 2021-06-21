@@ -1,8 +1,8 @@
-Package: PlexedPiper
+Package: PlexedPiperDMS
 Type: Package
-Title: Pipeline for isobaric quantification.
+Title: Tools for accessing PNNL's Data Management System (DMS).
 Version: 0.1.8
-Author: Vladislav Petyuk vladislav.petyuk@pnnl.gov
+Author: Vladislav Petyuk, Michael Nestor, Jamie Moon
 Maintainer: Vladislav Petyuk <vladislav.petyuk@pnnl.gov>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
@@ -11,7 +11,8 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Depends:
-    MSnID (>= 1.18.1),
+    MSnID,
+	PlexedPiper,
     PlexedPiperTestData
 Imports:
    AnnotationHub,
@@ -37,6 +38,6 @@ Imports:
    MSnbase,
    purrr,
    tibble
-Remotes: github::vladpetyuk/PlexedPiperTestData, github::vladpetyuk/MSnID
+Remotes: github::mdnestor/PlexedPiperDMS
 biocViews:
 VignetteBuilder: knitr
