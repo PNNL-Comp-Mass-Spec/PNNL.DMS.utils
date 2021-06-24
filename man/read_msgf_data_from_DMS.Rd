@@ -4,13 +4,19 @@
 \alias{read_msgf_data_from_DMS}
 \title{Reading MSGF output from PNNL's DMS}
 \usage{
-read_msgf_data_from_DMS(data_package_num)
+read_msgf_data_from_DMS(data_package_num, param_file = NULL)
 }
 \arguments{
 \item{data_package_num}{(Numeric or Character vector) containing Data Package ID(s) located in DMS}
+
+\item{param_file}{(character) MS-GF+ parameter file. 
+If the data package jobs refer to only one parameter 
+file, then NULL (default) can be accepted as the argument.}
 }
 \value{
 (data.frame) concatenated job results
+
+(MSnID) MSnID object
 }
 \description{
 Reading MSGF output from PNNL's DMS

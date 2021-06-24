@@ -2,7 +2,6 @@
 #'
 #' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
 #' @return (data.frame) concatenated job results
-=======
 #' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
 #' @param param_file (character) MS-GF+ parameter file. 
 #'                   If the data package jobs refer to only one parameter 
@@ -45,7 +44,7 @@ read_msgf_data_from_DMS <- function(data_package_num, param_file = NULL) {
   tool <- unique(jobRecords$Tool)
   pattern <- tool2suffix[[tool]]
   results <- results[[pattern]]
-  return(results)
+  convert_msgf_output_to_msnid(results)
 }
 
 
