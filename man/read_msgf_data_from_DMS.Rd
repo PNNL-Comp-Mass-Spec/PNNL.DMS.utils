@@ -4,19 +4,18 @@
 \alias{read_msgf_data_from_DMS}
 \title{Reading MSGF output from PNNL's DMS}
 \usage{
-read_msgf_data_from_DMS(DataPkgNumber)
+read_msgf_data_from_DMS(data_package_num)
 }
 \arguments{
-\item{DataPkgNumber}{(Numeric or Character vector) containing Data Package ID(s) located in DMS}
+\item{data_package_num}{(Numeric or Character vector) containing Data Package ID(s) located in DMS}
 }
 \value{
-(MSnID) MSnID object
+(data.frame) concatenated job results
 }
 \description{
 Reading MSGF output from PNNL's DMS
 }
 \examples{
-msnid <- read_msgf_data_from_DMS(3442)
-print(msnid)
-head(MSnID::psms(msnid))
+results <- read_msgf_data_from_DMS(3442)
+head(results)
 }

@@ -10,34 +10,13 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Depends:
-    MSnID,
-	PlexedPiper,
-    PlexedPiperTestData
 Imports:
-   AnnotationHub,
-   AnnotationDbi,
-   Biostrings,
-   BiocStyle,
    data.table,
    dplyr,
-   plyr,
-   IRanges,
-   MSnbase,
-   odbc,
-   purrr,
-   tibble,
-   tidyr,
-   tidyselect,
-   tools,
    knitr,
-   rmarkdown,
-   readr,
-   Rcpp,
-   IRanges,
-   MSnbase,
-   purrr,
-   tibble
-Remotes: github::mdnestor/PlexedPiperDMS
+   odbc,
+   plyr,
+   readr
+Remotes: github::PNNL-Comp-Mass-Spec/PNNL.DMS.utils
 biocViews:
 VignetteBuilder: knitr

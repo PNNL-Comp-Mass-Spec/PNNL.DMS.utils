@@ -1,40 +1,20 @@
 #' Reading MSGF output from PNNL's DMS
 #'
-#' @param DataPkgNumber (Numeric or Character vector) containing Data Package ID(s) located in DMS
+#' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
+#' @return (data.frame) concatenated job results
+=======
+#' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
 #' @param param_file (character) MS-GF+ parameter file. 
 #'                   If the data package jobs refer to only one parameter 
 #'                   file, then NULL (default) can be accepted as the argument.
 #' @return (MSnID) MSnID object
-#' @importFrom PlexedPiper convert_msgf_output_to_msnid
 #' 
 #' @examples
-#' msnid <- read_msgf_data_from_DMS(3442)
-#' print(msnid)
-#' head(MSnID::psms(msnid))
+#' results <- read_msgf_data_from_DMS(3442)
+#' head(results)
 
 #' @export
-read_msgf_data_from_DMS__old <- function(DataPkgNumber) {
-  # Fetch job records for data package(s)
-  if (length(DataPkgNumber) > 1) {
-    job_rec_ls <- lapply(DataPkgNumber, get_job_records_by_dataset_package)
-    jobRecords <- Reduce(rbind, job_rec_ls)
-  } else {
-    jobRecords <- get_job_records_by_dataset_package(DataPkgNumber)
-  }
-
-  jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
-  results <- get_results_for_multiple_jobs.dt(jobRecords) 
-  
-  tool <- unique(jobRecords$Tool)
-  pattern <- tool2suffix[[tool]]
-  results <- results[[pattern]]
-  msnid <- convert_msgf_output_to_msnid(results)
-  return(msnid)
-}
-
-
-
-read_msgf_data_from_DMS <- function(DataPkgNumber, param_file = NULL) {
+read_msgf_data_from_DMS <- function(data_package_num, param_file = NULL) {
   # Fetch job records for data package(s)
   if (length(DataPkgNumber) > 1) {
     job_rec_ls <- lapply(DataPkgNumber, get_job_records_by_dataset_package)
@@ -65,8 +45,7 @@ read_msgf_data_from_DMS <- function(DataPkgNumber, param_file = NULL) {
   tool <- unique(jobRecords$Tool)
   pattern <- tool2suffix[[tool]]
   results <- results[[pattern]]
-  msnid <- convert_msgf_output_to_msnid(results)
-  return(msnid)
+  return(results)
 }
 
 

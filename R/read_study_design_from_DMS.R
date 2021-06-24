@@ -8,11 +8,10 @@
 #' @description
 #' * `read_study_design_from_DMS()`: finds data package folder in DMS and calls read_study_design there
 #'
-#' @param dataPkgNumber (integer) data package number for DMS
+#' @param data_package_num (integer) data package number for DMS
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
-#' @importFrom PlexedPiper read_study_design
-#'
+#' @importFrom readr read_tsv cols
 #' @name read_study_design
 #'
 #' @examples
@@ -26,7 +25,7 @@
 #' @export
 #' @rdname read_study_design
 # gets 3 study design files from DMS
-read_study_design_from_DMS <- function(dataPkgNumber) {
+read_study_design_from_DMS <- function(data_package_num) {
   
   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
                      get_driver(),
@@ -38,7 +37,7 @@ read_study_design_from_DMS <- function(dataPkgNumber) {
                     SELECT *
                     FROM V_Data_Package_Detail_Report
                     WHERE ID = %s",
-                    dataPkgNumber)
+                    data_package_num)
   qry <- dbSendQuery(con, strSQL)
   dataPkgReport <- dbFetch(qry)
   dbClearResult(qry)
@@ -60,14 +59,20 @@ read_study_design_from_DMS <- function(dataPkgNumber) {
   }else{
     stop("Unknown OS type.")
   }
-  
-  study_design <- read_study_design(local_folder)
-  
-  if(.Platform$OS.type == "unix"){
-    umount_cmd <- sprintf("umount %s", local_folder)
-    system(umount_cmd)
-    unlink(local_folder, recursive = T)
-  }
-  
-  return(study_design)
+
+  filenames <- c("fractions.txt", "samples.txt", "references.txt")
+
+  results <- lapply(filenames, function(filename) {
+    pathToFile <- list.files(path = local_folder,
+                             pattern = filename,
+                             full.names = T)
+    if (length(pathToFile) == 0) {
+      stop(filename, " not found.")
+    }
+    read_tsv(pathToFile,
+             col_types = cols(.default = "c"),
+             progress = FALSE)
+  })
+  names(results) <- sub(".txt", "", filenames)
+  return(results)
 }

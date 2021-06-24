@@ -2,7 +2,7 @@
 #'
 #' This function read AScore results from a local folder.
 #'
-#' @param DataPkgNumber (Numeric or Character vector) containing Data Package ID(s) located in DMS
+#' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
 #' @return ascore (data.frame) AScore results
 #'
 #' @importFrom dplyr rename inner_join
@@ -12,9 +12,9 @@
 #'
 #'
 #' @examples
-#' dataPkgNumber <- 3625
-#' msnid <- read_msms_data_from_DMS(dataPkgNumber)
-#' ascore <- read_AScore_results_from_DMS(dataPkgNumber)
+#' data_package_num <- 3625
+#' msnid <- read_msms_data_from_DMS(data_package_num)
+#' ascore <- read_AScore_results_from_DMS(data_package_num)
 #' msnid <- best_PTM_location_by_ascore(msnid, ascore)
 #'
 
@@ -23,7 +23,7 @@
 #' @export
 #' @rdname pnnl_dms_utils
 # Get AScore results for a given data package (e.g. 3432)
-read_AScore_results_from_DMS <- function(dataPkgNumber){
+read_AScore_results_from_DMS <- function(data_package_num){
   #
   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
                      get_driver(),
@@ -31,7 +31,7 @@ read_AScore_results_from_DMS <- function(dataPkgNumber){
   con <- dbConnect(odbc(), .connection_string=con_str)
   strSQL <- sprintf("SELECT *
                      FROM V_Mage_Analysis_Jobs
-                     WHERE (Dataset LIKE 'DataPackage_%s%%')", dataPkgNumber)
+                     WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
   qry <- dbSendQuery(con, strSQL)
   job <- dbFetch(qry)
   dbClearResult(qry)
