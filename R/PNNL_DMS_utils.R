@@ -21,14 +21,15 @@
 #'
 #'
 #' @param mtdbName (string) name of mass tag database
-#' @param dataPkgNumber (interger) data package id
+#' @param data_package_num (interger) data package id
 #' @param jobs (integer) DMS job ID
 #' @param xPttrn (string) substrings for names of dataset, experiment, tool, parameter file, settings file, fasta file, protein options, instrument name
 #' @param mostRecent (logical) only most recent or all output files
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
-#' @importFrom dplyr rename
+#' @importFrom dplyr %>% rename
 #' @importFrom readr read_tsv
+#' @importFrom data.table data.table rbindlist
 #'
 # '@importFrom data.table
 #'
@@ -217,7 +218,7 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
 #' #' @export
 #' #' @rdname pnnl_dms_utils
 #' # Get AScore results for a given data package
-#' get_AScore_results <- function(dataPkgNumber)
+#' get_AScore_results <- function(data_package_num)
 #' {
 #'    #
 #'    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
@@ -226,7 +227,7 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
 #'    con <- dbConnect(odbc(), .connection_string=con_str)
 #'    strSQL <- sprintf("SELECT *
 #'                      FROM V_Mage_Analysis_Jobs
-#'                      WHERE (Dataset LIKE 'DataPackage_%s%%')", dataPkgNumber)
+#'                      WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
 #'    qry <- dbSendQuery(con, strSQL)
 #'    jobs <- dbFetch(qry)
 #'    dbClearResult(qry)
@@ -250,7 +251,7 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
 #' @export
 #' @rdname pnnl_dms_utils
 # Get AScore results for a given data package (e.g. 3432)
-get_AScore_results <- function(dataPkgNumber){
+get_AScore_results <- function(data_package_num){
    #
    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
                       get_driver(),
@@ -258,7 +259,7 @@ get_AScore_results <- function(dataPkgNumber){
    con <- dbConnect(odbc(), .connection_string=con_str)
    strSQL <- sprintf("SELECT *
                      FROM V_Mage_Analysis_Jobs
-                     WHERE (Dataset LIKE 'DataPackage_%s%%')", dataPkgNumber)
+                     WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
    qry <- dbSendQuery(con, strSQL)
    job <- dbFetch(qry)
    dbClearResult(qry)
@@ -308,7 +309,7 @@ get_AScore_results <- function(dataPkgNumber){
 # RODBC version
 #' #' @export
 #' #' @rdname pnnl_dms_utils
-#' get_job_records_by_dataset_package <- function(dataPkgNumber)
+#' get_job_records_by_dataset_package <- function(data_package_num)
 #' {
 #'    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
 #'                       get_driver(),
@@ -318,7 +319,7 @@ get_AScore_results <- function(dataPkgNumber){
 #'                     SELECT *
 #'                     FROM V_Mage_Data_Package_Analysis_Jobs
 #'                     WHERE Data_Package_ID = %s",
-#'                     dataPkgNumber)
+#'                     data_package_num)
 #'    jr <- sqlQuery(con, strSQL, stringsAsFactors=FALSE)
 #'    close(con)
 #'    return(jr)
@@ -328,7 +329,7 @@ get_AScore_results <- function(dataPkgNumber){
 # odbc/DBI verson
 #' @export
 #' @rdname pnnl_dms_utils
-get_job_records_by_dataset_package <- function(dataPkgNumber)
+get_job_records_by_dataset_package <- function(data_package_num)
 {
    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
                       get_driver(),
@@ -338,7 +339,7 @@ get_job_records_by_dataset_package <- function(dataPkgNumber)
                      SELECT *
                      FROM V_Mage_Data_Package_Analysis_Jobs
                      WHERE Data_Package_ID = %s",
-                     dataPkgNumber)
+                     data_package_num)
    qry <- dbSendQuery(con, strSQL)
    jr <- dbFetch(qry)
    dbClearResult(qry)
@@ -532,7 +533,7 @@ path_to_FASTA_used_by_DMS <- function(data_package_number){
 #' @export
 #' @rdname pnnl_dms_utils
 # gets 3 study design files from package directory
-get_study_design_by_dataset_package <- function(dataPkgNumber) {
+get_study_design_by_dataset_package <- function(data_package_num) {
 
    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
                       get_driver(),
@@ -544,7 +545,7 @@ get_study_design_by_dataset_package <- function(dataPkgNumber) {
                     SELECT *
                     FROM V_Data_Package_Detail_Report
                     WHERE ID = %s",
-                     dataPkgNumber)
+                     data_package_num)
    qry <- dbSendQuery(con, strSQL)
    dataPkgReport <- dbFetch(qry)
    dbClearResult(qry)

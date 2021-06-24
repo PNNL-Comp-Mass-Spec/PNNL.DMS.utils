@@ -11,8 +11,8 @@ read_with_name <- function(x, suffix){
    cbind.data.frame(Dataset = nm, x, stringsAsFactors=FALSE)
 }
 
-collate_files <- function(path_to_MASIC_results, suffix){
-   files <- list.files(path_to_MASIC_results,
+collate_files <- function(path_to_results, suffix){
+   files <- list.files(path_to_results,
                        pattern = suffix,
                        full.names = TRUE)
    # using llply just for progress bar
