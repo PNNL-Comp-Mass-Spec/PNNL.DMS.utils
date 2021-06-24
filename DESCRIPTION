@@ -18,6 +18,6 @@ Imports:
    plyr,
    readr
 Remotes:
-   github::PNNL-Comp-Mass-Spec/PNNL.DMS.utils
+   github::PNNL-Comp-Mass-Spec/MSnID
 biocViews:
 VignetteBuilder: knitr
