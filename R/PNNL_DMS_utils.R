@@ -31,7 +31,6 @@
 #' @importFrom readr read_tsv
 #' @importFrom data.table data.table rbindlist
 #'
-# '@importFrom data.table
 #'
 #' @name pnnl_dms_utils
 #'
@@ -46,16 +45,16 @@ tool2suffix <- list("MSGFPlus"="_msgfplus_syn.txt",
                     "MASIC_Finnigan"=c("_ReporterIons.txt","_ScanStatsEx.txt","_SICstats.txt"),
                     "TopPIC" = "_TopPIC_PrSMs.txt")
 
-link_min <- function(scan2,scan3){
-   if (scan3 > scan2){
-      out <- scan3
-   }
-   else {
-      out <- Inf
-   }
-}
-
-link_min_vectorized <- Vectorize(link_min)
+# link_min <- function(scan2,scan3){
+#    if (scan3 > scan2){
+#       out <- scan3
+#    }
+#    else {
+#       out <- Inf
+#    }
+# }
+# 
+# link_min_vectorized <- Vectorize(link_min)
 
 get_driver <- function(){
    if(.Platform$OS.type == "unix"){
