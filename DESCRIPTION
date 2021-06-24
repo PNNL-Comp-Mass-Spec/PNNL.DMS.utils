@@ -17,6 +17,7 @@ Imports:
    odbc,
    plyr,
    readr
-Remotes: github::PNNL-Comp-Mass-Spec/PNNL.DMS.utils
+Remotes:
+   github::PNNL-Comp-Mass-Spec/PNNL.DMS.utils
 biocViews:
 VignetteBuilder: knitr
