@@ -37,7 +37,6 @@
 #'
 #' @examples
 #' get_output_folder_for_job_and_tool(863951, "DTA_Refinery")
-NULL
 
 # dictionary that defines the suffix of the files given the analysis tool
 tool2suffix <- list("MSGFPlus"="_msgfplus_syn.txt",
