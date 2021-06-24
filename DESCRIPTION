@@ -17,6 +17,6 @@ Imports:
    odbc,
    plyr,
    readr
-Remotes: github::PNNL-Comp-Mass-Spec/PlexedPiperDMS
+Remotes: github::PNNL-Comp-Mass-Spec/PNNL.DMS.utils
 biocViews:
 VignetteBuilder: knitr
