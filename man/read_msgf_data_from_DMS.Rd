@@ -22,6 +22,6 @@ file, then NULL (default) can be accepted as the argument.}
 Reading MSGF output from PNNL's DMS
 }
 \examples{
-msnid <- read_msgf_data_from_DMS(3442)
+msnid <- read_msgf_data_from_DMS(3606)
 show(msnid)
 }
