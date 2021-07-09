@@ -1,13 +1,27 @@
 #' Reading MASIC results from PNNL's DMS
 #'
-#' @param data_package (numeric or character vector) containing Data Package ID(s) located in DMS
-#' @param interference_score (logical) read interference score. Default is FALSE.
+#' @param data_package_num (numeric or character vector) containing Data Package 
+#'     ID(s) located in DMS.
+#' @param interference_score (logical) read interference score. Default is 
+#'     \code{FALSE}.
+#' @param id_quant_table If the MS/MS identification scans and reporter ion 
+#'     intensity scans are different for a particular dataset, set this to 
+#'     \code{TRUE}. Default is \code{FALSE}.
+#' 
 #' @return (data.frame) with reporter ion intensities and other metrics
-#' @importFrom dplyr select
+#' 
+#' @importFrom dplyr select contains starts_with
+#' 
 #' @export read_masic_data_from_DMS
+
 
 read_masic_data_from_DMS <- function(data_package_num, interference_score=FALSE, 
                                      id_quant_table = FALSE){
+   
+   # Prevent "no visible binding for global variable" note
+   Dataset <- Scan <- QuantScan <- IDScan <- 
+      FragScanNumber <- ScanNumber <- NULL
+   
    on.exit(gc(), add = TRUE)
 
    # Fetch job records for data package(s)
@@ -113,8 +127,4 @@ read_masic_data_from_DMS <- function(data_package_num, interference_score=FALSE,
 # masicData <- z
 # save(masicData, file="masicData_original.RData")
 #
-#
-#
-#
-#
-#
+
