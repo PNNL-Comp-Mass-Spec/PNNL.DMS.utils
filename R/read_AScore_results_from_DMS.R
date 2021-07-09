@@ -13,10 +13,10 @@
 #'
 #' @examples
 #' data_package_num <- 3625
-#' msnid <- read_msms_data_from_DMS(data_package_num)
+#' # msnid <- read_msgf_data_from_DMS(data_package_num) # Not run
 #' ascore <- read_AScore_results_from_DMS(data_package_num)
-#' msnid <- best_PTM_location_by_ascore(msnid, ascore)
-#'
+#' # Use PlexedPiper to make use of the Ascore results
+#' # msnid <- PlexedPiper::best_PTM_location_by_ascore(msnid, ascore)
 
 
 
@@ -24,7 +24,9 @@
 #' @rdname pnnl_dms_utils
 # Get AScore results for a given data package (e.g. 3432)
 read_AScore_results_from_DMS <- function(data_package_num){
-  #
+  # Prevent "no visible binding for global variable" note
+  Dataset <- NULL
+  
   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
                      get_driver(),
                      get_auth())
@@ -49,7 +51,7 @@ read_AScore_results_from_DMS <- function(data_package_num){
       unlink(local_folder, recursive = T)
     }
     dir.create(local_folder)
-    remote_folder <- gsub("\\\\","/",job['Folder'])
+    remote_folder <- gsub("\\\\", "/", job['Folder'])
     mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
     system(mount_cmd)
     # read the stuff
@@ -66,7 +68,7 @@ read_AScore_results_from_DMS <- function(data_package_num){
     ascores <- read_tsv(
       file.path(job['Folder'],"Concatenated_msgfplus_syn_ascore.txt"))
     job_to_dataset_map <- read_tsv(
-      file.path(job['Folder'],"Job_to_Dataset_Map.txt"))
+      file.path(job['Folder'], "Job_to_Dataset_Map.txt"))
   }else{
     stop("unknown OS")
   }
