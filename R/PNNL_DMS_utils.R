@@ -10,9 +10,8 @@
 #' * `get_dms_job_records()`: returns job records given variety keyword patterns
 #' * `get_tool_output_files_for_job_number()`: returns the output of the tool given tool name and file pattern
 #' * `get_output_folder_for_job_and_tool()`: returns the path given job id and tool name
-#'
-#' * `get_AScore_results()`: returns Ascore results given data packge number
-#' * `get_job_records_by_dataset_package()`: returns job records given data packge number
+#' * `get_AScore_results()`: returns Ascore results given data package number
+#' * `get_job_records_by_dataset_package()`: returns job records given data package number
 #' * `get_results_for_multiple_jobs()`: returns concatenated results given job numbers
 #' * `get_results_for_multiple_jobs.dt()`: returns results as concatenated data.table given job numbers
 #' * `get_results_for_single_job()`: returns results given job number
@@ -20,16 +19,29 @@
 #' @md
 #'
 #'
-#' @param mtdbName (string) name of mass tag database
-#' @param data_package_num (interger) data package id
+#' @param data_package_num (integer) data package id
 #' @param jobs (integer) DMS job ID
-#' @param xPttrn (string) substrings for names of dataset, experiment, tool, parameter file, settings file, fasta file, protein options, instrument name
 #' @param mostRecent (logical) only most recent or all output files
+#' @param jobNumber placeholder
+#' @param toolName placeholder
+#' @param fileNamePttrn placeholder
+#' @param instrumentPttrn placeholder
+#' @param jobRecords placeholder
+#' @param pathToFile placeholder
+#' @param datasetPttrn placeholder
+#' @param experimentPttrn placeholder
+#' @param toolPttrn placeholder
+#' @param parPttrn  placeholder
+#' @param settingsPttrn placeholder
+#' @param fastaPttrn placeholder
+#' @param proteinOptionsPttrn placeholder
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
+#' @importFrom plyr ldply
 #' @importFrom dplyr %>% rename
 #' @importFrom readr read_tsv
 #' @importFrom data.table data.table rbindlist
+#' @importFrom utils read.delim tail
 #'
 #'
 #' @name pnnl_dms_utils
@@ -38,11 +50,13 @@
 #' get_output_folder_for_job_and_tool(863951, "DTA_Refinery")
 
 # dictionary that defines the suffix of the files given the analysis tool
-tool2suffix <- list("MSGFPlus"="_msgfplus_syn.txt",
-                    "MSGFPlus_MzML"="_msgfplus_syn.txt",
-                    "MSGFPlus_DTARefinery"="_msgfplus_syn.txt",
+tool2suffix <- list("MSGFPlus" = "_msgfplus_syn.txt",
+                    "MSGFPlus_MzML" = "_msgfplus_syn.txt",
+                    "MSGFPlus_DTARefinery" = "_msgfplus_syn.txt",
                     "MSGFDB_DTARefinery"="_msgfdb_syn.txt",
-                    "MASIC_Finnigan"=c("_ReporterIons.txt","_ScanStatsEx.txt","_SICstats.txt"),
+                    "MASIC_Finnigan" = c("_ReporterIons.txt",
+                                         "_ScanStatsEx.txt",
+                                         "_SICstats.txt"),
                     "TopPIC" = "_TopPIC_PrSMs.txt")
 
 # link_min <- function(scan2,scan3){
@@ -110,7 +124,7 @@ get_dms_job_records <- function(
    settingsPttrn = "",
    fastaPttrn = "",
    proteinOptionsPttrn = "",
-   intrumentPttrn = ""){
+   instrumentPttrn = ""){
 
    # first check if the input is valid
    x = as.list(environment())
@@ -154,7 +168,7 @@ get_dms_job_records <- function(
                        settingsPttrn,
                        fastaPttrn,
                        proteinOptionsPttrn,
-                       intrumentPttrn)
+                       instrumentPttrn)
    }
    qry <- dbSendQuery(con, strSQL)
    locationPointersToMSMSjobs <- dbFetch(qry)
@@ -166,15 +180,15 @@ get_dms_job_records <- function(
 
 #' @export
 #' @rdname pnnl_dms_utils
-get_tool_output_files_for_job_number <- function(jobNumber, toolName,
-                                                 filePattern, mostRecent=TRUE)
+get_tool_output_files_for_job_number <- function(jobNumber, toolName = NULL,
+                                                 fileNamePttrn, mostRecent=TRUE)
 {
    # get job records first. This will be useful to get dataset folder
    jobRecord <- get_dms_job_records(jobNumber)
    datasetFolder <- dirname( as.character(jobRecord$Folder))
 
    # get tool's subfolder
-   if( is.missing(toolName) ){
+   if( is.null(toolName) ){
       toolFolder = ''
    }else{
       # return stuff from the main dataset folder
@@ -182,7 +196,7 @@ get_tool_output_files_for_job_number <- function(jobNumber, toolName,
    }
    #
    candidateFiles = list.files(file.path(datasetFolder, toolFolder),
-                               pattern=filePattern, full.names=TRUE,
+                               pattern=fileNamePttrn, full.names=TRUE,
                                ignore.case=TRUE)
    #
    if(length(candidateFiles) == 1){
@@ -213,44 +227,46 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
 }
 
 
-#' #' @export
-#' #' @rdname pnnl_dms_utils
-#' # Get AScore results for a given data package
-#' get_AScore_results <- function(data_package_num)
-#' {
-#'    #
-#'    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-#'                       get_driver(),
-#'                       get_auth())
-#'    con <- dbConnect(odbc(), .connection_string=con_str)
-#'    strSQL <- sprintf("SELECT *
-#'                      FROM V_Mage_Analysis_Jobs
-#'                      WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
-#'    qry <- dbSendQuery(con, strSQL)
-#'    jobs <- dbFetch(qry)
-#'    dbClearResult(qry)
-#'    dbDisconnect(con)
-#'    #
-#'    if(nrow(jobs) == 1){
-#'       # library("RSQLite")
-#'       dlist <- basename(as.character(jobs["Folder"]))
-#'       idx <- which.max(as.numeric(sub("Step_(\\d+)_.*", "\\1", dlist))) # the Results supposed to be in the last folder
-#'       ascoreResultDB <- file.path( jobs["Folder"], dlist[idx], "Results.db3")
-#'       db <- dbConnect(SQLite(), dbname = ascoreResultDB)
-#'       AScores <- dbGetQuery(db, "SELECT * FROM t_results_ascore")
-#'       dbDisconnect(db)
-#'       return(AScores)
-#'    }else{
-#'       return(NULL)
-#'    }
-#' }
+# #' @export
+# #' @rdname pnnl_dms_utils
+# # Get AScore results for a given data package
+# get_AScore_results <- function(data_package_num)
+# {
+#    #
+#    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
+#                       get_driver(),
+#                       get_auth())
+#    con <- dbConnect(odbc(), .connection_string=con_str)
+#    strSQL <- sprintf("SELECT *
+#                      FROM V_Mage_Analysis_Jobs
+#                      WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
+#    qry <- dbSendQuery(con, strSQL)
+#    jobs <- dbFetch(qry)
+#    dbClearResult(qry)
+#    dbDisconnect(con)
+#    #
+#    if(nrow(jobs) == 1){
+#       # library("RSQLite")
+#       dlist <- basename(as.character(jobs["Folder"]))
+#       idx <- which.max(as.numeric(sub("Step_(\\d+)_.*", "\\1", dlist))) # the Results supposed to be in the last folder
+#       ascoreResultDB <- file.path( jobs["Folder"], dlist[idx], "Results.db3")
+#       db <- dbConnect(SQLite(), dbname = ascoreResultDB)
+#       AScores <- dbGetQuery(db, "SELECT * FROM t_results_ascore")
+#       dbDisconnect(db)
+#       return(AScores)
+#    }else{
+#       return(NULL)
+#    }
+# }
 
 
 #' @export
 #' @rdname pnnl_dms_utils
 # Get AScore results for a given data package (e.g. 3432)
 get_AScore_results <- function(data_package_num){
-   #
+   # Prevent "no visible binding for global variable" note
+   Dataset <- NULL
+   
    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
                       get_driver(),
                       get_auth())
@@ -272,7 +288,7 @@ get_AScore_results <- function(data_package_num){
    if(.Platform$OS.type == "unix"){
       local_folder <- "~/temp_AScoreResults"
       if(file.exists(local_folder)){
-         unlink(local_folder, recursive = T)
+         unlink(local_folder, recursive = TRUE)
       }
       dir.create(local_folder)
       remote_folder <- gsub("\\\\","/",job['Folder'])
@@ -286,7 +302,7 @@ get_AScore_results <- function(data_package_num){
       # end of read the stuff
       umount_cmd <- sprintf("umount %s", local_folder)
       system(umount_cmd)
-      unlink(local_folder, recursive = T)
+      unlink(local_folder, recursive = TRUE)
    }else if(.Platform$OS.type == "windows"){
       # in case Windows
       ascores <- read_tsv(
@@ -305,23 +321,23 @@ get_AScore_results <- function(data_package_num){
 
 
 # RODBC version
-#' #' @export
-#' #' @rdname pnnl_dms_utils
-#' get_job_records_by_dataset_package <- function(data_package_num)
-#' {
-#'    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-#'                       get_driver(),
-#'                       get_auth())
-#'    con <- odbcDriverConnect(con_str)
-#'    strSQL = sprintf("
-#'                     SELECT *
-#'                     FROM V_Mage_Data_Package_Analysis_Jobs
-#'                     WHERE Data_Package_ID = %s",
-#'                     data_package_num)
-#'    jr <- sqlQuery(con, strSQL, stringsAsFactors=FALSE)
-#'    close(con)
-#'    return(jr)
-#' }
+# #' @export
+# #' @rdname pnnl_dms_utils
+# get_job_records_by_dataset_package <- function(data_package_num)
+# {
+#    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
+#                       get_driver(),
+#                       get_auth())
+#    con <- odbcDriverConnect(con_str)
+#    strSQL = sprintf("
+#                     SELECT *
+#                     FROM V_Mage_Data_Package_Analysis_Jobs
+#                     WHERE Data_Package_ID = %s",
+#                     data_package_num)
+#    jr <- sqlQuery(con, strSQL, stringsAsFactors=FALSE)
+#    close(con)
+#    return(jr)
+# }
 
 
 # odbc/DBI verson
@@ -373,7 +389,7 @@ get_results_for_multiple_jobs.dt <- function(jobRecords){
    for (fileNamePttrn in tool2suffix[[toolName]]){
       result[[fileNamePttrn]] <- llply(jobRecords[["Folder"]], get_results_for_single_job.dt, 
                                 fileNamePttrn = fileNamePttrn, .progress = "text") %>% 
-         rbindlist(., fill = T)    # fill = T to handle differing numbers of columns in ScanStatsEx
+         rbindlist(fill = TRUE)    # fill = TRUE to handle differing numbers of columns in ScanStatsEx
    }
    return(result)
 }
@@ -384,37 +400,37 @@ get_results_for_multiple_jobs.dt <- function(jobRecords){
 get_results_for_single_job <- function(pathToFile, fileNamePttrn){
    pathToFile = list.files( path=as.character(pathToFile),
                             pattern=fileNamePttrn,
-                            full.names=T)
+                            full.names=TRUE)
    if(length(pathToFile) == 0){
       stop("can't find the results file")
    }
    if(length(pathToFile) > 1){
       stop("ambiguous results files")
    }
-   results <- read.delim( pathToFile, header=T, stringsAsFactors = FALSE)
+   results <- read.delim( pathToFile, header=TRUE, stringsAsFactors = FALSE)
    dataset <- strsplit( basename(pathToFile), split=fileNamePttrn)[[1]]
    out <- data.frame(Dataset=dataset, results, stringsAsFactors = FALSE)
    return(out)
 }
 
 
-#' #' @export
-#' #' @rdname pnnl_dms_utils
-#' get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
-#'    pathToFile = list.files(path=as.character(pathToFile),
-#'                            pattern=fileNamePttrn,
-#'                            full.names=T)
-#'    if(length(pathToFile) == 0){
-#'       stop("can't find the results file")
-#'    }
-#'    if(length(pathToFile) > 1){
-#'       stop("ambiguous results files")
-#'    }
-#'    results <- read.delim( pathToFile, header=T, stringsAsFactors = FALSE)
-#'    dataset <- strsplit( basename(pathToFile), split=fileNamePttrn)[[1]]
-#'    out <- data.table(Dataset=dataset, results)
-#'    return(out)
-#' }
+# #' @export
+# #' @rdname pnnl_dms_utils
+# get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
+#    pathToFile = list.files(path=as.character(pathToFile),
+#                            pattern=fileNamePttrn,
+#                            full.names=TRUE)
+#    if(length(pathToFile) == 0){
+#       stop("can't find the results file")
+#    }
+#    if(length(pathToFile) > 1){
+#       stop("ambiguous results files")
+#    }
+#    results <- read.delim( pathToFile, header=TRUE, stringsAsFactors = FALSE)
+#    dataset <- strsplit( basename(pathToFile), split=fileNamePttrn)[[1]]
+#    out <- data.table(Dataset=dataset, results)
+#    return(out)
+# }
 
 
 
@@ -426,7 +442,7 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
    if(.Platform$OS.type == "unix"){
       local_folder <- "~/temp_msms_results"
       if(file.exists(local_folder)){
-         unlink(local_folder, recursive = T)
+         unlink(local_folder, recursive = TRUE)
       }
       dir.create(local_folder)
       remote_folder <- gsub("\\\\","/",pathToFile)
@@ -440,7 +456,7 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
 
    pathToFile <- list.files(path=local_folder,
                            pattern=fileNamePttrn,
-                           full.names=T)
+                           full.names=TRUE)
    if(length(pathToFile) == 0){
       stop("can't find the results file")
    }
@@ -453,7 +469,7 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
    if(.Platform$OS.type == "unix"){
       umount_cmd <- sprintf("umount %s", local_folder)
       system(umount_cmd)
-      unlink(local_folder, recursive = T)
+      unlink(local_folder, recursive = TRUE)
    }
 
    dataset <- strsplit(basename(pathToFile), split=fileNamePttrn)[[1]]
@@ -466,11 +482,11 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
 #' @export
 #' @rdname pnnl_dms_utils
 # Returns path to FASTA. Note FASTA will be in temp directory.
-path_to_FASTA_used_by_DMS <- function(data_package_number){
+path_to_FASTA_used_by_DMS <- function(data_package_num){
 
    # make sure it was the same fasta used for all msgf jobs
    # at this point this works only with one data package at a time
-   jobRecords <- get_job_records_by_dataset_package(data_package_number)
+   jobRecords <- get_job_records_by_dataset_package(data_package_num)
    jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
    if(length(unique(jobRecords$`Organism DB`)) != 1){
       stop("There should be exactly one FASTA file per data package!")
@@ -497,7 +513,7 @@ path_to_FASTA_used_by_DMS <- function(data_package_number){
    if(.Platform$OS.type == "unix"){
       local_folder <- "~/temp_fasta"
       if(file.exists(local_folder)){
-         unlink(local_folder, recursive = T)
+         unlink(local_folder, recursive = TRUE)
       }
       dir.create(local_folder)
       remote_folder <- gsub("\\\\","/",res['Organism DB Storage Path'])
@@ -509,7 +525,7 @@ path_to_FASTA_used_by_DMS <- function(data_package_number){
       # end of copy file
       umount_cmd <- sprintf("umount %s", local_folder)
       system(umount_cmd)
-      unlink(local_folder, recursive = T)
+      unlink(local_folder, recursive = TRUE)
    }else if(.Platform$OS.type == "windows"){
       # in case of Windows
       path_to_FASTA <- file.path(res['Organism DB Storage Path'],
@@ -551,13 +567,13 @@ get_study_design_by_dataset_package <- function(data_package_num) {
    if(.Platform$OS.type == "unix"){
       local_folder <- "~/temp_study_des"
       if(file.exists(local_folder)){
-         unlink(local_folder, recursive = T)
+         unlink(local_folder, recursive = TRUE)
       }
       dir.create(local_folder)
 
       remote_folder <- gsub("\\\\","/", dataPkgReport$`Share Path`)
-      remote_folder <- gsub("(", "\\(", remote_folder, fixed = T)
-      remote_folder <- gsub(")", "\\)", remote_folder, fixed = T)
+      remote_folder <- gsub("(", "\\(", remote_folder, fixed = TRUE)
+      remote_folder <- gsub(")", "\\)", remote_folder, fixed = TRUE)
       mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
       system(mount_cmd)
    }else if(.Platform$OS.type == "windows"){
@@ -569,7 +585,7 @@ get_study_design_by_dataset_package <- function(data_package_num) {
    ## fetch samples.txt
    pathToFile <- list.files(path=local_folder,
                             pattern="^samples.txt$",
-                            full.names=T)
+                            full.names=TRUE)
    if(length(pathToFile) == 0){
       stop("Could not find 'samples.txt' file in DMS Data Package folder.")
    }
@@ -587,7 +603,7 @@ get_study_design_by_dataset_package <- function(data_package_num) {
    ## fetch fractions.txt
    pathToFile <- list.files(path=local_folder,
                             pattern="^fractions.txt$",
-                            full.names=T)
+                            full.names=TRUE)
    if (length(pathToFile) == 0){
       stop("Could not find 'fractions.txt' file in DMS Data Package folder.")
    }
@@ -603,7 +619,7 @@ get_study_design_by_dataset_package <- function(data_package_num) {
    ## fetch references.txt
    pathToFile <- list.files(path=local_folder,
                             pattern="^references.txt$",
-                            full.names=T)
+                            full.names=TRUE)
    if(length(pathToFile) == 0){
       stop("Could not find 'references.txt' file in DMS Data Package folder.")
    }
@@ -619,7 +635,7 @@ get_study_design_by_dataset_package <- function(data_package_num) {
    if(.Platform$OS.type == "unix"){
       umount_cmd <- sprintf("umount %s", local_folder)
       system(umount_cmd)
-      unlink(local_folder, recursive = T)
+      unlink(local_folder, recursive = TRUE)
    }
 
    study_des <- list(samples = samples,
@@ -627,3 +643,5 @@ get_study_design_by_dataset_package <- function(data_package_num) {
                      references = references)
    return(study_des)
 }
+
+

@@ -36,13 +36,13 @@ get_dms_job_records(
   settingsPttrn = "",
   fastaPttrn = "",
   proteinOptionsPttrn = "",
-  intrumentPttrn = ""
+  instrumentPttrn = ""
 )
 
 get_tool_output_files_for_job_number(
   jobNumber,
-  toolName,
-  filePattern,
+  toolName = NULL,
+  fileNamePttrn,
   mostRecent = TRUE
 )
 
@@ -60,7 +60,7 @@ get_results_for_single_job(pathToFile, fileNamePttrn)
 
 get_results_for_single_job.dt(pathToFile, fileNamePttrn)
 
-path_to_FASTA_used_by_DMS(data_package_number)
+path_to_FASTA_used_by_DMS(data_package_num)
 
 get_study_design_by_dataset_package(data_package_num)
 
@@ -69,13 +69,35 @@ read_AScore_results_from_DMS(data_package_num)
 \arguments{
 \item{jobs}{(integer) DMS job ID}
 
+\item{datasetPttrn}{placeholder}
+
+\item{experimentPttrn}{placeholder}
+
+\item{toolPttrn}{placeholder}
+
+\item{parPttrn}{placeholder}
+
+\item{settingsPttrn}{placeholder}
+
+\item{fastaPttrn}{placeholder}
+
+\item{proteinOptionsPttrn}{placeholder}
+
+\item{instrumentPttrn}{placeholder}
+
+\item{jobNumber}{placeholder}
+
+\item{toolName}{placeholder}
+
+\item{fileNamePttrn}{placeholder}
+
 \item{mostRecent}{(logical) only most recent or all output files}
 
 \item{data_package_num}{(Numeric or Character vector) containing Data Package ID(s) located in DMS}
 
-\item{mtdbName}{(string) name of mass tag database}
+\item{jobRecords}{placeholder}
 
-\item{xPttrn}{(string) substrings for names of dataset, experiment, tool, parameter file, settings file, fasta file, protein options, instrument name}
+\item{pathToFile}{placeholder}
 }
 \value{
 ascore (data.frame) AScore results
@@ -90,8 +112,8 @@ to be installed. Mac/Linux functionality is not well tested.
 \item \code{get_dms_job_records()}: returns job records given variety keyword patterns
 \item \code{get_tool_output_files_for_job_number()}: returns the output of the tool given tool name and file pattern
 \item \code{get_output_folder_for_job_and_tool()}: returns the path given job id and tool name
-\item \code{get_AScore_results()}: returns Ascore results given data packge number
-\item \code{get_job_records_by_dataset_package()}: returns job records given data packge number
+\item \code{get_AScore_results()}: returns Ascore results given data package number
+\item \code{get_job_records_by_dataset_package()}: returns job records given data package number
 \item \code{get_results_for_multiple_jobs()}: returns concatenated results given job numbers
 \item \code{get_results_for_multiple_jobs.dt()}: returns results as concatenated data.table given job numbers
 \item \code{get_results_for_single_job()}: returns results given job number
@@ -103,9 +125,9 @@ This function read AScore results from a local folder.
 \examples{
 get_output_folder_for_job_and_tool(863951, "DTA_Refinery")
 data_package_num <- 3625
-msnid <- read_msms_data_from_DMS(data_package_num)
+# msnid <- read_msgf_data_from_DMS(data_package_num) # Not run
 ascore <- read_AScore_results_from_DMS(data_package_num)
-msnid <- best_PTM_location_by_ascore(msnid, ascore)
-
+# Use PlexedPiper to make use of the Ascore results
+# msnid <- PlexedPiper::best_PTM_location_by_ascore(msnid, ascore)
 }
 \keyword{datasets}
