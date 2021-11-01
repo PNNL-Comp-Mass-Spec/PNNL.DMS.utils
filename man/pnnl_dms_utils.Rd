@@ -60,7 +60,7 @@ get_results_for_single_job(pathToFile, fileNamePttrn)
 
 get_results_for_single_job.dt(pathToFile, fileNamePttrn)
 
-path_to_FASTA_used_by_DMS(data_package_num)
+path_to_FASTA_used_by_DMS(data_package_num, organism_db = NULL)
 
 get_study_design_by_dataset_package(data_package_num)
 
@@ -98,6 +98,10 @@ read_AScore_results_from_DMS(data_package_num)
 \item{jobRecords}{placeholder}
 
 \item{pathToFile}{placeholder}
+
+\item{organism_db}{(character) FASTA file. This is the same as the
+\code{Organism DB} column. No need to specify this if there is only
+one FASTA file associated with the jobs.}
 }
 \value{
 ascore (data.frame) AScore results
