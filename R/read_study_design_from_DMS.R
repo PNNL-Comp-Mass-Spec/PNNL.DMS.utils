@@ -23,9 +23,7 @@
 
 
 #' @export
-#' @rdname read_study_design
-# gets 3 study design files from DMS
-read_study_design_from_DMS <- function(data_package_num) {
+path_to_study_design_from_DMS <- function(data_package_num) {
   
   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
                      get_driver(),
@@ -59,7 +57,13 @@ read_study_design_from_DMS <- function(data_package_num) {
   }else{
     stop("Unknown OS type.")
   }
+  return(local_folder)
+}
 
+#' @export
+read_study_design_from_DMS <- function(data_package_num) {
+  
+  local_folder <- path_to_study_design_from_DMS(data_package_num)
   filenames <- c("fractions.txt", "samples.txt", "references.txt")
 
   results <- lapply(filenames, function(filename) {
@@ -69,10 +73,31 @@ read_study_design_from_DMS <- function(data_package_num) {
     if (length(pathToFile) == 0) {
       stop(filename, " not found.")
     }
-    read_tsv(pathToFile,
-             col_types = cols(.default = "c"),
-             progress = FALSE)
+    df <- read_tsv(pathToFile,
+                   col_types = cols(.default = "c"),
+                   progress = FALSE)
+    df <- as.data.frame(df)
   })
   names(results) <- sub(".txt", "", filenames)
   return(results)
+}
+
+#' @export
+write_study_design_tables <- function(data_package_num, study_design, overwrite = FALSE) {
+  
+  stopifnot(!is.null(names(study_design)))
+  
+  local_folder <- path_to_study_design_from_DMS(data_package_num)
+  
+  for (i in 1:3) {
+    table <- study_design[[i]]
+    tablename <- paste0(names(study_design)[i], ".txt")
+    pathToFile <- list.files(path = local_folder, pattern = paste0("^", tablename, "$"))
+    if ((length(pathToFile) == 0) | overwrite) {
+      write.table(table, file = file.path(local_folder, tablename),
+                  quote = FALSE, sep = "\t", row.names = FALSE)
+    } else {
+      stop(tablename, " already exists! Try setting overwrite = T.")
+    }
+  }
 }
