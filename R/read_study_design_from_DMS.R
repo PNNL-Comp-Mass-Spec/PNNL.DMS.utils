@@ -66,9 +66,9 @@ read_study_design_from_DMS <- function(data_package_num) {
   path_to_study_design <- path_to_study_design_from_DMS(data_package_num)
   study_design <- PlexedPiper::read_study_design(path_to_study_design)
   study_design <- list()
-  for (fname in c("fractions", "samples", "references")) {
-    fname <- file.path(path_to_study_design, paste0(fname, ".txt"))
-    study_design[[fname]] <- read.table(fname, header = TRUE, colClasses = "character")
+  for (name in c("fractions", "samples", "references")) {
+    fname <- file.path(path_to_study_design, paste0(name, ".txt"))
+    study_design[[name]] <- read.table(fname, header = TRUE, colClasses = "character")
   }
   return(study_design)
 }
