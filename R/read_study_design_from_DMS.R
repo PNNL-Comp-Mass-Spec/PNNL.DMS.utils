@@ -67,16 +67,13 @@ read_study_design_from_DMS <- function(data_package_num) {
   filenames <- c("fractions.txt", "samples.txt", "references.txt")
 
   results <- lapply(filenames, function(filename) {
-    pathToFile <- list.files(path = local_folder,
-                             pattern = filename,
-                             full.names = T)
-    if (length(pathToFile) == 0) {
+    path_to_file <- list.files(path = local_folder,
+                               pattern = filename,
+                               full.names = T)
+    if (length(path_to_file) == 0) {
       stop(filename, " not found.")
     }
-    df <- read_tsv(pathToFile,
-                   col_types = cols(.default = "c"),
-                   progress = FALSE)
-    df <- as.data.frame(df)
+    df <- read.table(path_to_file, header = TRUE, colClasses = "character")
   })
   names(results) <- sub(".txt", "", filenames)
   return(results)
