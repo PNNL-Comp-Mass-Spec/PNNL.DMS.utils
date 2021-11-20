@@ -62,21 +62,10 @@ path_to_study_design_from_DMS <- function(data_package_num) {
 
 #' @export
 read_study_design_from_DMS <- function(data_package_num) {
-  
-  local_folder <- path_to_study_design_from_DMS(data_package_num)
-  filenames <- c("fractions.txt", "samples.txt", "references.txt")
-
-  results <- lapply(filenames, function(filename) {
-    path_to_file <- list.files(path = local_folder,
-                               pattern = filename,
-                               full.names = T)
-    if (length(path_to_file) == 0) {
-      stop(filename, " not found.")
-    }
-    df <- read.table(path_to_file, header = TRUE, colClasses = "character")
-  })
-  names(results) <- sub(".txt", "", filenames)
-  return(results)
+  require(PlexedPiper)
+  path_to_study_design <- path_to_study_design_from_DMS(data_package_num)
+  study_design <- PlexedPiper::read_study_design(path_to_study_design)
+  return(study_design)
 }
 
 #' @export
