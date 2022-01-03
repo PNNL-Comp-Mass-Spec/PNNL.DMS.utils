@@ -2,24 +2,30 @@
 % Please edit documentation in R/read_msgf_data_from_DMS.R
 \name{read_msgf_data_from_DMS}
 \alias{read_msgf_data_from_DMS}
-\title{Reading MSGF output from PNNL's DMS}
+\title{Reading MS-GF+ output from PNNL's DMS}
 \usage{
-read_msgf_data_from_DMS(data_package_num, param_file = NULL)
+read_msgf_data_from_DMS(
+  data_package_num,
+  param_file = NULL,
+  organism_db = NULL
+)
 }
 \arguments{
-\item{data_package_num}{(Numeric or Character vector) containing Data Package ID(s) located in DMS}
+\item{data_package_num}{(Numeric or Character vector) containing Data 
+Package ID(s) located in DMS.}
 
-\item{param_file}{(character) MS-GF+ parameter file. 
-If the data package jobs refer to only one parameter 
-file, then NULL (default) can be accepted as the argument.}
+\item{param_file}{(character) MS-GF+ parameter file. No need to specify this 
+if there is only one parameter file associated with the jobs.}
+
+\item{organism_db}{(character) FASTA file. This is the same as the 
+\code{Organism DB} column. No need to specify this if there is only 
+one FASTA file associated with the jobs.}
 }
 \value{
-(data.frame) concatenated job results
-
 (MSnID) MSnID object
 }
 \description{
-Reading MSGF output from PNNL's DMS
+Reading MS-GF+ output from PNNL's DMS
 }
 \examples{
 msnid <- read_msgf_data_from_DMS(3606)

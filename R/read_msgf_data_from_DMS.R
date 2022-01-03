@@ -1,11 +1,13 @@
-#' Reading MSGF output from PNNL's DMS
+#' Reading MS-GF+ output from PNNL's DMS
 #'
-#' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
-#' @return (data.frame) concatenated job results
-#' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
-#' @param param_file (character) MS-GF+ parameter file. 
-#'                   If the data package jobs refer to only one parameter 
-#'                   file, then NULL (default) can be accepted as the argument.
+#' @param data_package_num (Numeric or Character vector) containing Data 
+#'        Package ID(s) located in DMS.
+#' @param param_file (character) MS-GF+ parameter file. No need to specify this 
+#'        if there is only one parameter file associated with the jobs.
+#' @param organism_db (character) FASTA file. This is the same as the 
+#'        \code{Organism DB} column. No need to specify this if there is only 
+#'        one FASTA file associated with the jobs.
+#' 
 #' @return (MSnID) MSnID object
 #' 
 #' @importFrom MSnID convert_msgf_output_to_msnid
@@ -15,7 +17,9 @@
 #' show(msnid)
 
 #' @export
-read_msgf_data_from_DMS <- function(data_package_num, param_file = NULL) {
+read_msgf_data_from_DMS <- function(data_package_num, 
+                                    param_file = NULL,
+                                    organism_db = NULL) {
   # Fetch job records for data package(s)
   if (length(data_package_num) > 1) {
     job_rec_ls <- lapply(data_package_num, get_job_records_by_dataset_package)
@@ -49,7 +53,31 @@ read_msgf_data_from_DMS <- function(data_package_num, param_file = NULL) {
     }
   }
   
-  jobRecords <- jobRecords[jobRecords$Parameter_File == param_file, ]
+  # FASTA files (organism_db)
+  organism_dbs <- unique(jobRecords$`Organism DB`)
+  
+  # Check if organism_db is NULL
+  if (is.null(organism_db)) {
+    # If there is a single FASTA file, assign it to organism_db
+    if (length(organism_dbs) == 1) {
+      organism_db <- organism_dbs
+    } else {
+      # If there are multiple FASTA files, and organism_db is NULL,
+      # halt execution and print an error message.
+      stop(paste("There are multiple FASTA files.", 
+                 "Please specify which FASTA file to use with organism_db.")
+      )
+    }
+  } else {
+    # If organism_db is not NULL, check validity.
+    if (!(organism_db %in% organism_dbs)) {
+      stop(paste0("\"", organism_db, "\"", " is not a valid FASTA file."))
+    }
+  }
+  
+  # Subset to specific parameter file and FASTA file
+  jobRecords <- jobRecords[jobRecords$Parameter_File == param_file &
+                             jobRecords$`Organism DB` == organism_db, ]
   
   results <- get_results_for_multiple_jobs.dt(jobRecords) 
   tool <- unique(jobRecords$Tool)
