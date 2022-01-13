@@ -7,19 +7,22 @@
 read_msgf_data_from_DMS(
   data_package_num,
   param_file = NULL,
-  organism_db = NULL
+  organism_db = NULL,
+  use_mzIdentML = FALSE
 )
 }
 \arguments{
-\item{data_package_num}{(Numeric or Character vector) containing Data 
-Package ID(s) located in DMS.}
+\item{data_package_num}{numeric or character; the Data Package ID in the DMS.}
 
-\item{param_file}{(character) MS-GF+ parameter file. No need to specify this 
+\item{param_file}{character; MS-GF+ parameter file. No need to specify this
 if there is only one parameter file associated with the jobs.}
 
-\item{organism_db}{(character) FASTA file. This is the same as the 
-\code{Organism DB} column. No need to specify this if there is only 
-one FASTA file associated with the jobs.}
+\item{organism_db}{character; FASTA file name. This is the same as the
+\code{Organism DB} column. No need to specify this if there is only one
+FASTA file associated with the jobs.}
+
+\item{use_mzIdentML}{logical; whether to read mzIdentML files into \code{psms}
+\code{data.table} slot of the \code{MSnID}.}
 }
 \value{
 (MSnID) MSnID object
@@ -27,7 +30,18 @@ one FASTA file associated with the jobs.}
 \description{
 Reading MS-GF+ output from PNNL's DMS
 }
+\details{
+If \code{use_mzIdentML = TRUE}, a progress bar will not be displayed
+while the results are being fetched. Also, the table in the \code{psms} slot
+will not be the same as when \code{mzIdentML = FALSE}. As a result, it may
+require additional modification by the user to prepare it for downstream
+processing steps.
+}
 \examples{
 msnid <- read_msgf_data_from_DMS(3606)
+show(msnid)
+
+#
+msnid <- read_msgf_data_from_DMS(3606, use_mzIdentML = TRUE)
 show(msnid)
 }
