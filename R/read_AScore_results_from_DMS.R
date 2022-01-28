@@ -5,7 +5,7 @@
 #' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
 #' @return ascore (data.frame) AScore results
 #'
-#' @importFrom dplyr rename inner_join
+#' @importFrom dplyr rename inner_join filter
 #' @importFrom readr read_tsv
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
 #' @export read_AScore_results_from_DMS
@@ -36,6 +36,7 @@ read_AScore_results_from_DMS <- function(data_package_num){
                      WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
   qry <- dbSendQuery(con, strSQL)
   job <- dbFetch(qry)
+  job <- dplyr::filter(job, Tool == "Phospho_FDR_Aggregator")
   dbClearResult(qry)
   dbDisconnect(con)
   
