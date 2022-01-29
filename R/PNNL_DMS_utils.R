@@ -41,7 +41,7 @@
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
 #' @importFrom plyr ldply
-#' @importFrom dplyr %>% rename
+#' @importFrom dplyr %>% rename filter
 #' @importFrom readr read_tsv
 #' @importFrom data.table data.table rbindlist
 #' @importFrom utils read.delim tail
@@ -280,6 +280,7 @@ get_AScore_results <- function(data_package_num){
                      WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
    qry <- dbSendQuery(con, strSQL)
    job <- dbFetch(qry)
+   job <- dplyr::filter(job, Tool == "Phospho_FDR_Aggregator")
    dbClearResult(qry)
    dbDisconnect(con)
    
