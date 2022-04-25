@@ -52,6 +52,7 @@
 # dictionary that defines the suffix of the files given the analysis tool
 tool2suffix <- list("MSGFPlus" = "_msgfplus_syn.txt",
                     "MSGFPlus_MzML" = "_msgfplus_syn.txt",
+                    "MSGFPlus_MzML_NoRefine" = "_msgfplus_syn.txt",
                     "MSGFPlus_DTARefinery" = "_msgfplus_syn.txt",
                     "MSGFDB_DTARefinery"="_msgfdb_syn.txt",
                     "MASIC_Finnigan" = c("_ReporterIons.txt",
