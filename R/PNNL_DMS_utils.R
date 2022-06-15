@@ -517,7 +517,7 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL){
    strSQL <- sprintf("Select [Organism DB],
                              [Organism DB Storage Path]
                      From V_Analysis_Job_Detail_Report_2
-                     Where JobNum = %s", jobRecords$Job[1])
+                     Where Job = %s", jobRecords$Job[1])
    
    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
                       get_driver(),
