@@ -16,6 +16,7 @@
 #' * `get_results_for_multiple_jobs.dt()`: returns results as concatenated data.table given job numbers
 #' * `get_results_for_single_job()`: returns results given job number
 #' * `get_results_for_single_job.dt()`: returns results as data.table given job number
+#' * `read_tsv_helper()`: prevents macOS unmount error by copying file to local folder before reading .tsv file
 #' @md
 #'
 #'
@@ -301,13 +302,14 @@ get_AScore_results <- function(data_package_num){
       mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
       system(mount_cmd)
       # read the stuff
-      ascores <- read_tsv(
+      ascores <- read_tsv_helper(
          file.path(local_folder,"Concatenated_msgfplus_syn_ascore.txt"))
-      job_to_dataset_map <- read_tsv(
+      job_to_dataset_map <- read_tsv_helper(
          file.path(local_folder,"Job_to_Dataset_Map.txt"))
       # end of read the stuff
-      umount_cmd <- sprintf("umount %s", local_folder)
-      system(umount_cmd)
+      #umount_cmd <- sprintf("umount %s", local_folder)
+      #system(umount_cmd)
+      warning("Skipping `umount` step for macOS 12 compatibility.")
       unlink(local_folder, recursive = TRUE)
    }else if(.Platform$OS.type == "windows"){
       # in case Windows
@@ -443,7 +445,6 @@ get_results_for_single_job <- function(pathToFile, fileNamePttrn){
 #' @export
 #' @rdname pnnl_dms_utils
 get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
-   
    pathToFile <- as.character(pathToFile)
    if(.Platform$OS.type == "unix"){
       local_folder <- "~/temp_msms_results"
@@ -470,10 +471,10 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
       stop("ambiguous results files")
    }
    
-   results <- read_tsv(pathToFile, col_types=readr::cols(), progress=FALSE)
+   results <- read_tsv_helper(pathToFile, col_types=readr::cols(), progress=T)
    
    if(.Platform$OS.type == "unix"){
-      umount_cmd <- sprintf("umount %s", local_folder)
+      umount_cmd <- sprintf("diskutil unmount %s", local_folder)
       system(umount_cmd)
       unlink(local_folder, recursive = TRUE)
    }
@@ -545,9 +546,11 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL){
       path_to_FASTA <- file.path(local_folder, res['Organism DB'])
       file.copy(path_to_FASTA, temp_dir)
       # end of copy file
-      umount_cmd <- sprintf("umount %s", local_folder)
-      system(umount_cmd)
-      unlink(local_folder, recursive = TRUE)
+      #umount_cmd <- sprintf("umount %s", local_folder)
+      #system(umount_cmd)
+      warning("Skipping `umount` step for macOS 12 compatibility.")
+      warning("Skipping `unlink` step for macOS 12 compatibility")
+      #unlink(local_folder, recursive = TRUE)
    }else if(.Platform$OS.type == "windows"){
       # in case of Windows
       path_to_FASTA <- file.path(res['Organism DB Storage Path'],
@@ -655,8 +658,9 @@ get_study_design_by_dataset_package <- function(data_package_num) {
    }
    
    if(.Platform$OS.type == "unix"){
-      umount_cmd <- sprintf("umount %s", local_folder)
-      system(umount_cmd)
+      #umount_cmd <- sprintf("umount %s", local_folder)
+      #system(umount_cmd)
+      warning("Skipping `umount` step for macOS 12 compatibility.")
       unlink(local_folder, recursive = TRUE)
    }
    
@@ -666,4 +670,28 @@ get_study_design_by_dataset_package <- function(data_package_num) {
    return(study_des)
 }
 
+#' @export
+#' @rdname pnnl_dms_utils
+read_tsv_helper <- function(pathToFile, ...) {
+  read_tsv_helper_local_dir <- "~/read_tsv_helper_local_dir"
+  if (file.exists(read_tsv_helper_local_dir)) {
+    unlink(read_tsv_helper_local_dir, recursive = TRUE)
+  }
+  dir.create(read_tsv_helper_local_dir)
+  print("Copying remote file to local temporary directory.")
+  system(sprintf("cd %s", read_tsv_helper_local_dir))
+  temp_filename <- paste(read_tsv_helper_local_dir, "/local_cp.txt", sep = "")
+  cmd <- sprintf(
+    "rsync --progress %s %s",
+    pathToFile,
+    temp_filename)
+  system(cmd)
+  system("cd ~")
+  result <- read_tsv(
+    temp_filename,
+    ...
+  )
+  unlink(read_tsv_helper_local_dir, recursive = TRUE)
+  return(result)
+}
 

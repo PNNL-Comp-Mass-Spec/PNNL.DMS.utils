@@ -56,9 +56,9 @@ read_AScore_results_from_DMS <- function(data_package_num){
     mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
     system(mount_cmd)
     # read the stuff
-    ascores <- read_tsv(
+    ascores <- read_tsv_helper(
       file.path(local_folder,"Concatenated_msgfplus_syn_ascore.txt"))
-    job_to_dataset_map <- read_tsv(
+    job_to_dataset_map <- read_tsv_helper(
       file.path(local_folder,"Job_to_Dataset_Map.txt"))
     # end of read the stuff
     umount_cmd <- sprintf("umount %s", local_folder)

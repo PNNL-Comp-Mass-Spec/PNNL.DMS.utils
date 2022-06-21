@@ -73,7 +73,7 @@ read_study_design_from_DMS <- function(data_package_num) {
     if (length(pathToFile) == 0) {
       stop(filename, " not found.")
     }
-    df <- read_tsv(pathToFile,
+    df <- read_tsv_helper(pathToFile,
                    col_types = cols(.default = "c"),
                    progress = FALSE)
     df <- as.data.frame(df)
