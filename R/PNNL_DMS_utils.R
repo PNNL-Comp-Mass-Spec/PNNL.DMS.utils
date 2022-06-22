@@ -444,46 +444,39 @@ get_results_for_single_job <- function(pathToFile, fileNamePttrn){
 
 #' @export
 #' @rdname pnnl_dms_utils
-get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
-   pathToFile <- as.character(pathToFile)
-   if(.Platform$OS.type == "unix"){
-      local_folder <- "~/temp_msms_results"
-      if(file.exists(local_folder)){
-         unlink(local_folder, recursive = TRUE)
-      }
-      dir.create(local_folder)
-      remote_folder <- gsub("\\\\","/",pathToFile)
-      mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
-      system(mount_cmd)
-   }else if(.Platform$OS.type == "windows"){
-      local_folder <- pathToFile
-   }else{
-      stop("Unknown OS type.")
-   }
-   
-   pathToFile <- list.files(path=local_folder,
-                            pattern=fileNamePttrn,
-                            full.names=TRUE)
-   if(length(pathToFile) == 0){
-      stop("can't find the results file")
-   }
-   if(length(pathToFile) > 1){
-      stop("ambiguous results files")
-   }
-   
-   results <- read_tsv_helper(pathToFile, col_types=readr::cols(), progress=T)
-   
-   if(.Platform$OS.type == "unix"){
-      umount_cmd <- sprintf("diskutil unmount %s", local_folder)
-      system(umount_cmd)
-      unlink(local_folder, recursive = TRUE)
-   }
-   
-   dataset <- strsplit(basename(pathToFile), split=fileNamePttrn)[[1]]
-   out <- data.table(Dataset=dataset, results)
-   return(out)
+get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn) {
+  pathToFile <- as.character(pathToFile)
+  if (.Platform$OS.type == "unix") {
+    pathToFile <- gsub("\\\\", "/", pathToFile)
+  }
+  else if (.Platform$OS.type != "windows") {
+    stop("Unknown OS type.")
+  }
+  dir_path <-
+    sub("\\/\\/([^\\/]+)\\/",
+        "https:\\/\\/\\1.pnl.gov/",
+        pathToFile)
+  download.file(paste(dir_path, "/", sep = "")
+                , destfile = "temp_dir_listing.html")
+  
+  dir_listing_vec <- scan("temp_dir_listing.html", what = "character")
+  dir_listing_str <- paste(dir_listing_vec, sep = "", collapse = "")
+  unlink("temp_dir_listing.html")
+  
+  file_name_pattern_escaped <- str_replace_all(fileNamePttrn, "(\\W)", "\\\\\\1")
+  file_name_regex <- paste(">([^\\/]*", file_name_pattern_escaped, ")<", sep = "")
+  file_name <- str_match(dir_listing_str, file_name_regex)[, -1]
+  
+  complete_url <- paste(dir_path, "/", file_name, sep = "")
+  
+  results <- read_tsv(complete_url,
+                       col_types = readr::cols(),
+                       progress = T)
+  
+  dataset <- strsplit(basename(pathToFile), split = fileNamePttrn)[[1]]
+  out <- data.table(Dataset = dataset, results)
+  return(out)
 }
-
 
 
 #' @export
