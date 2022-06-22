@@ -46,6 +46,7 @@
 #' @importFrom readr read_tsv
 #' @importFrom data.table data.table rbindlist
 #' @importFrom utils read.delim tail
+#' @importFrom stringr str_match_all str_match str_replace_all str_replace
 #'
 #'
 #' @name pnnl_dms_utils
@@ -440,38 +441,40 @@ get_results_for_single_job <- function(pathToFile, fileNamePttrn){
 #    return(out)
 # }
 
-
-
 #' @export
 #' @rdname pnnl_dms_utils
-get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn) {
+get_url_from_dir_and_file <- function(dir, file_name_segment) {
   pathToFile <- as.character(pathToFile)
-  if (.Platform$OS.type == "unix") {
+  if (.Platform$OS.type == "unix") { # Exchange two backslashes for a forward slash in unix environment
     pathToFile <- gsub("\\\\", "/", pathToFile)
   }
   else if (.Platform$OS.type != "windows") {
     stop("Unknown OS type.")
   }
-  dir_path <-
-    sub("\\/\\/([^\\/]+)\\/",
-        "https:\\/\\/\\1.pnl.gov/",
-        pathToFile)
-  download.file(paste(dir_path, "/", sep = "")
-                , destfile = "temp_dir_listing.html")
+  dir_url <- sub("\\/\\/([^\\/]+)\\/", "https:\\/\\/\\1.pnl.gov/", pathToFile)
   
-  dir_listing_vec <- scan("temp_dir_listing.html", what = "character")
+  # Download directory listing; turn it into string
+  download.file(paste(dir_url, "/", sep = ""), destfile = "temp_dir_listing.html", quiet = TRUE) 
+  dir_listing_vec <- scan("temp_dir_listing.html", what = "character", quiet = TRUE)
   dir_listing_str <- paste(dir_listing_vec, sep = "", collapse = "")
   unlink("temp_dir_listing.html")
   
+  # Build up full URL
   file_name_pattern_escaped <- str_replace_all(fileNamePttrn, "(\\W)", "\\\\\\1")
-  file_name_regex <- paste(">([^\\/]*", file_name_pattern_escaped, ")<", sep = "")
+  file_name_regex <- paste(">([^\\/]*", file_name_pattern_escaped, "[^\\/]*)<", sep = "")
   file_name <- str_match(dir_listing_str, file_name_regex)[, -1]
   
   complete_url <- paste(dir_path, "/", file_name, sep = "")
+  return(complete_url)
+}
+
+
+#' @export
+#' @rdname pnnl_dms_utils
+get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn) {
   
-  results <- read_tsv(complete_url,
-                       col_types = readr::cols(),
-                       progress = T)
+  url <- get_url_from_dir_and_file(pathToFile, fileNamePttrn)
+  results <- read_tsv(url, col_types = readr::cols())
   
   dataset <- strsplit(basename(pathToFile), split = fileNamePttrn)[[1]]
   out <- data.table(Dataset = dataset, results)
@@ -522,6 +525,11 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL){
    res <- dbFetch(qry)
    dbClearResult(qry)
    dbDisconnect(con)
+   
+   
+   
+   
+   
    
    temp_dir <- tempdir()
    

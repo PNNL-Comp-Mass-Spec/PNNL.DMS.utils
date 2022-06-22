@@ -2,10 +2,10 @@
 % Please edit documentation in R/read_study_design_from_DMS.R
 \name{read_study_design}
 \alias{read_study_design}
-\alias{read_study_design_from_DMS}
+\alias{path_to_study_design_from_DMS}
 \title{Utilities for reading study design files.}
 \usage{
-read_study_design_from_DMS(data_package_num)
+path_to_study_design_from_DMS(data_package_num)
 }
 \arguments{
 \item{data_package_num}{(integer) data package number for DMS}

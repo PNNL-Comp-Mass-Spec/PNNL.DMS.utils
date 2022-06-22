@@ -17,10 +17,11 @@
 \alias{get_results_for_single_job.dt}
 \alias{path_to_FASTA_used_by_DMS}
 \alias{get_study_design_by_dataset_package}
+\alias{read_tsv_helper}
 \alias{read_AScore_results_from_DMS}
 \title{Utilities for interacting with PNNL DMS}
 \format{
-An object of class \code{list} of length 6.
+An object of class \code{list} of length 7.
 }
 \usage{
 tool2suffix
@@ -63,6 +64,8 @@ get_results_for_single_job.dt(pathToFile, fileNamePttrn)
 path_to_FASTA_used_by_DMS(data_package_num, organism_db = NULL)
 
 get_study_design_by_dataset_package(data_package_num)
+
+read_tsv_helper(pathToFile, ...)
 
 read_AScore_results_from_DMS(data_package_num)
 }
@@ -122,6 +125,7 @@ to be installed. Mac/Linux functionality is not well tested.
 \item \code{get_results_for_multiple_jobs.dt()}: returns results as concatenated data.table given job numbers
 \item \code{get_results_for_single_job()}: returns results given job number
 \item \code{get_results_for_single_job.dt()}: returns results as data.table given job number
+\item \code{read_tsv_helper()}: prevents macOS unmount error by copying file to local folder before reading .tsv file
 }
 
 This function read AScore results from a local folder.
