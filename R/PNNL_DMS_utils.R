@@ -389,14 +389,14 @@ get_results_for_multiple_jobs <- function(jobRecords){
 
 #' @export
 #' @rdname pnnl_dms_utils
-get_results_for_multiple_jobs.dt <- function(jobRecords){
+get_results_for_multiple_jobs_2.dt <- function(jobRecords){
    toolName = unique(jobRecords[["Tool"]])
    if (length(toolName) > 1) {
       stop("Contains results of more than one tool.")
    }
    result <- list()
    for (fileNamePttrn in tool2suffix[[toolName]]){
-      result[[fileNamePttrn]] <- llply(jobRecords[["Folder"]], get_results_for_single_job.dt, 
+      result[[fileNamePttrn]] <- llply(jobRecords[["Folder"]], get_results_for_single_job_2.dt, 
                                        fileNamePttrn = fileNamePttrn, .progress = "text") %>% 
          rbindlist(fill = TRUE)    # fill = TRUE to handle differing numbers of columns in ScanStatsEx
    }
@@ -444,14 +444,14 @@ get_results_for_single_job <- function(pathToFile, fileNamePttrn){
 #' @export
 #' @rdname pnnl_dms_utils
 get_url_from_dir_and_file <- function(dir, file_name_segment) {
-  pathToFile <- as.character(pathToFile)
+  dir <- as.character(dir)
   if (.Platform$OS.type == "unix") { # Exchange two backslashes for a forward slash in unix environment
-    pathToFile <- gsub("\\\\", "/", pathToFile)
+    dir <- gsub("\\\\", "/", dir)
   }
   else if (.Platform$OS.type != "windows") {
     stop("Unknown OS type.")
   }
-  dir_url <- sub("\\/\\/([^\\/]+)\\/", "https:\\/\\/\\1.pnl.gov/", pathToFile)
+  dir_url <- sub("\\/\\/([^\\/]+)\\/", "https:\\/\\/\\1.pnl.gov/", dir)
   
   # Download directory listing; turn it into string
   download.file(paste(dir_url, "/", sep = ""), destfile = "temp_dir_listing.html", quiet = TRUE) 
@@ -460,7 +460,7 @@ get_url_from_dir_and_file <- function(dir, file_name_segment) {
   unlink("temp_dir_listing.html")
   
   # Build up full URL
-  file_name_pattern_escaped <- str_replace_all(fileNamePttrn, "(\\W)", "\\\\\\1")
+  file_name_pattern_escaped <- str_replace_all(file_name_segment, "(\\W)", "\\\\\\1")
   file_name_regex <- paste(">([^\\/]*", file_name_pattern_escaped, "[^\\/]*)<", sep = "")
   file_name <- str_match(dir_listing_str, file_name_regex)[, -1]
   
@@ -471,7 +471,7 @@ get_url_from_dir_and_file <- function(dir, file_name_segment) {
 
 #' @export
 #' @rdname pnnl_dms_utils
-get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn) {
+get_results_for_single_job_2.dt <- function(pathToFile, fileNamePttrn) {
   
   url <- get_url_from_dir_and_file(pathToFile, fileNamePttrn)
   results <- read_tsv(url, col_types = readr::cols())
@@ -485,7 +485,7 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn) {
 #' @export
 #' @rdname pnnl_dms_utils
 # Returns path to FASTA. Note FASTA will be in temp directory.
-path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL){
+path_to_FASTA_used_by_DMS_2 <- function(data_package_num, organism_db = NULL){
    
    # make sure it was the same fasta used for all msgf jobs
    # at this point this works only with one data package at a time
@@ -526,44 +526,9 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL){
    dbClearResult(qry)
    dbDisconnect(con)
    
+   url <- get_url_from_dir_and_file(res['Organism DB Storage Path'], res['Organism DB'])
    
-   
-   
-   
-   
-   temp_dir <- tempdir()
-   
-   # OS-specific download
-   if(.Platform$OS.type == "unix"){
-      local_folder <- "~/temp_fasta"
-      if(file.exists(local_folder)){
-         unlink(local_folder, recursive = TRUE)
-      }
-      dir.create(local_folder)
-      remote_folder <- gsub("\\\\","/",res['Organism DB Storage Path'])
-      mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
-      system(mount_cmd)
-      # copy file
-      path_to_FASTA <- file.path(local_folder, res['Organism DB'])
-      file.copy(path_to_FASTA, temp_dir)
-      # end of copy file
-      #umount_cmd <- sprintf("umount %s", local_folder)
-      #system(umount_cmd)
-      warning("Skipping `umount` step for macOS 12 compatibility.")
-      warning("Skipping `unlink` step for macOS 12 compatibility")
-      #unlink(local_folder, recursive = TRUE)
-   }else if(.Platform$OS.type == "windows"){
-      # in case of Windows
-      path_to_FASTA <- file.path(res['Organism DB Storage Path'],
-                                 res['Organism DB'])
-      file.copy(path_to_FASTA, temp_dir)
-   }else{
-      stop("unknown OS")
-   }
-   
-   path_to_FASTA <- file.path(temp_dir, res['Organism DB'])
-   
-   return(path_to_FASTA)
+   return(url)
    
 }
 
