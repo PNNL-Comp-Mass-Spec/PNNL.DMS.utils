@@ -13,10 +13,18 @@
 #' @importFrom dplyr select contains starts_with
 #' 
 #' @export read_masic_data_from_DMS
+#' @export read_masic_data_from_DMS_2
 
 
 read_masic_data_from_DMS <- function(data_package_num, interference_score=FALSE, 
                                      id_quant_table = FALSE){
+  
+  if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+    stop("The function `read_masic_data_from_DMS` will likely crash your Mac!
+         (It is not compatible with macOS)
+         Please use `read_masic_data_from_DMS_2` instead.
+         Both functions have the same interface.")
+  }
    
    # Prevent "no visible binding for global variable" note
    Dataset <- Scan <- QuantScan <- IDScan <- 
@@ -62,6 +70,57 @@ read_masic_data_from_DMS <- function(data_package_num, interference_score=FALSE,
                               by = c("Dataset", "ScanNumber"))
    }
    return(masicData)
+}
+
+
+
+read_masic_data_from_DMS_2 <- function(data_package_num, interference_score=FALSE, 
+                                     id_quant_table = FALSE){
+  
+  # Prevent "no visible binding for global variable" note
+  Dataset <- Scan <- QuantScan <- IDScan <- 
+    FragScanNumber <- ScanNumber <- NULL
+  
+  on.exit(gc(), add = TRUE)
+  
+  # Fetch job records for data package(s)
+  if(length(data_package_num) > 1){
+    jobRecords <- lapply(data_package_num, get_job_records_by_dataset_package)
+    jobRecords <- Reduce(rbind, jobRecords)
+  } else {
+    jobRecords <- get_job_records_by_dataset_package(data_package_num)
+  }
+  
+  jobRecords <- jobRecords[grepl("MASIC", jobRecords$Tool),]
+  
+  # select relevant columns from df, drop redundant dataset column (select(-2))
+  masicList <- get_results_for_multiple_jobs_2.dt(jobRecords)
+  masicData <- masicList[["_ReporterIons.txt"]] %>% 
+    select(-2) %>% 
+    select(Dataset, 
+           ScanNumber, 
+           starts_with("Ion"), 
+           -contains("Resolution"))
+  
+  if (id_quant_table) {
+    quantIDTable <- make_id_to_quant_scan_link_table(masicList[["_ScanStatsEx.txt"]][,-2]) %>%
+      rename(ScanNumber = QuantScan)
+    masicData <- inner_join(quantIDTable, masicData, 
+                            by = c("Dataset", "ScanNumber")) %>%    
+      select(-ScanNumber) %>%    
+      rename(ScanNumber = IDScan)
+  }
+  
+  if (interference_score) {
+    masicStats <- masicList[["_SICstats.txt"]] %>% 
+      select(-2) %>%
+      select(Dataset, 
+             ScanNumber = FragScanNumber, 
+             contains("InterferenceScore"))
+    masicData <- inner_join(masicData, masicStats, 
+                            by = c("Dataset", "ScanNumber"))
+  }
+  return(masicData)
 }
 
 

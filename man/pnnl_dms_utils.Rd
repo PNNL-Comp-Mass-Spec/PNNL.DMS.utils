@@ -9,13 +9,19 @@
 \alias{get_dms_job_records}
 \alias{get_tool_output_files_for_job_number}
 \alias{get_output_folder_for_job_and_tool}
+\alias{get_AScore_results_2}
 \alias{get_AScore_results}
 \alias{get_job_records_by_dataset_package}
 \alias{get_results_for_multiple_jobs}
+\alias{get_results_for_multiple_jobs_2.dt}
 \alias{get_results_for_multiple_jobs.dt}
 \alias{get_results_for_single_job}
+\alias{get_url_from_dir_and_file}
+\alias{get_results_for_single_job_2.dt}
 \alias{get_results_for_single_job.dt}
 \alias{path_to_FASTA_used_by_DMS}
+\alias{path_to_FASTA_used_by_DMS_2}
+\alias{get_study_design_by_dataset_package_2}
 \alias{get_study_design_by_dataset_package}
 \alias{read_tsv_helper}
 \alias{read_AScore_results_from_DMS}
@@ -49,19 +55,31 @@ get_tool_output_files_for_job_number(
 
 get_output_folder_for_job_and_tool(jobNumber, toolName, mostRecent = TRUE)
 
+get_AScore_results_2(data_package_num)
+
 get_AScore_results(data_package_num)
 
 get_job_records_by_dataset_package(data_package_num)
 
 get_results_for_multiple_jobs(jobRecords)
 
+get_results_for_multiple_jobs_2.dt(jobRecords)
+
 get_results_for_multiple_jobs.dt(jobRecords)
 
 get_results_for_single_job(pathToFile, fileNamePttrn)
 
+get_url_from_dir_and_file(dir, file_name_segment)
+
+get_results_for_single_job_2.dt(pathToFile, fileNamePttrn)
+
 get_results_for_single_job.dt(pathToFile, fileNamePttrn)
 
 path_to_FASTA_used_by_DMS(data_package_num, organism_db = NULL)
+
+path_to_FASTA_used_by_DMS_2(data_package_num, organism_db = NULL)
+
+get_study_design_by_dataset_package_2(data_package_num)
 
 get_study_design_by_dataset_package(data_package_num)
 

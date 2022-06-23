@@ -266,68 +266,111 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
 #    }
 # }
 
+#' @export
+#' @rdname pnnl_dms_utils
+# Get AScore results for a given data package (e.g. 3432)
+get_AScore_results_2 <- function(data_package_num){
+    # Prevent "no visible binding for global variable" note
+    Dataset <- NULL
+    
+    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
+                       get_driver(),
+                       get_auth())
+    con <- dbConnect(odbc(), .connection_string=con_str)
+    strSQL <- sprintf("SELECT *
+                     FROM V_Mage_Analysis_Jobs
+                     WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
+    qry <- dbSendQuery(con, strSQL)
+    job <- dbFetch(qry)
+    job <- dplyr::filter(job, Tool == "Phospho_FDR_Aggregator")
+    dbClearResult(qry)
+    dbDisconnect(con)
+    
+    if(nrow(job) > 1){
+      warning("Multiple Ascore jobs detected. Selecting the last one.")
+      job <- tail(job, 1)
+    }
+
+    ascores_url <- get_url_from_dir_and_file(job['Folder'],"Concatenated_msgfplus_syn_ascore.txt")
+    job_to_dataset_url <- get_url_from_dir_and_file(job['Folder'],"Job_to_Dataset_Map.txt")
+    
+    ascores <- read_tsv(ascores_url)
+    job_to_dataset_map <- read_tsv(job_to_dataset_url)
+  
+    res <- inner_join(ascores, job_to_dataset_map) %>%
+      rename(spectrumFile = Dataset)
+    
+    return(res)
+  }
+  
+  # RODBC version
 
 #' @export
 #' @rdname pnnl_dms_utils
 # Get AScore results for a given data package (e.g. 3432)
 get_AScore_results <- function(data_package_num){
-   # Prevent "no visible binding for global variable" note
-   Dataset <- NULL
-   
-   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-                      get_driver(),
-                      get_auth())
-   con <- dbConnect(odbc(), .connection_string=con_str)
-   strSQL <- sprintf("SELECT *
+  if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+    stop("The function `get_AScore_results` will likely crash your Mac!
+         (It is not compatible with macOS)
+         Please use `get_AScore_results_2` instead.
+         Both functions have the same interface.")
+  }
+  
+  # Prevent "no visible binding for global variable" note
+  Dataset <- NULL
+  
+  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
+                     get_driver(),
+                     get_auth())
+  con <- dbConnect(odbc(), .connection_string=con_str)
+  strSQL <- sprintf("SELECT *
                      FROM V_Mage_Analysis_Jobs
                      WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
-   qry <- dbSendQuery(con, strSQL)
-   job <- dbFetch(qry)
-   job <- dplyr::filter(job, Tool == "Phospho_FDR_Aggregator")
-   dbClearResult(qry)
-   dbDisconnect(con)
-   
-   if(nrow(job) > 1){
-      warning("Multiple Ascore jobs detected. Selecting the last one.")
-      job <- tail(job, 1)
-   }
-   
-   # in case Mac OS
-   if(.Platform$OS.type == "unix"){
-      local_folder <- "~/temp_AScoreResults"
-      if(file.exists(local_folder)){
-         unlink(local_folder, recursive = TRUE)
-      }
-      dir.create(local_folder)
-      remote_folder <- gsub("\\\\","/",job['Folder'])
-      mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
-      system(mount_cmd)
-      # read the stuff
-      ascores <- read_tsv_helper(
-         file.path(local_folder,"Concatenated_msgfplus_syn_ascore.txt"))
-      job_to_dataset_map <- read_tsv_helper(
-         file.path(local_folder,"Job_to_Dataset_Map.txt"))
-      # end of read the stuff
-      #umount_cmd <- sprintf("umount %s", local_folder)
-      #system(umount_cmd)
-      warning("Skipping `umount` step for macOS 12 compatibility.")
+  qry <- dbSendQuery(con, strSQL)
+  job <- dbFetch(qry)
+  job <- dplyr::filter(job, Tool == "Phospho_FDR_Aggregator")
+  dbClearResult(qry)
+  dbDisconnect(con)
+  
+  if(nrow(job) > 1){
+    warning("Multiple Ascore jobs detected. Selecting the last one.")
+    job <- tail(job, 1)
+  }
+  
+  # in case Mac OS
+  if(.Platform$OS.type == "unix"){
+    local_folder <- "~/temp_AScoreResults"
+    if(file.exists(local_folder)){
       unlink(local_folder, recursive = TRUE)
-   }else if(.Platform$OS.type == "windows"){
-      # in case Windows
-      ascores <- read_tsv(
-         file.path(job['Folder'],"Concatenated_msgfplus_syn_ascore.txt"))
-      job_to_dataset_map <- read_tsv(
-         file.path(job['Folder'],"Job_to_Dataset_Map.txt"))
-   }else{
-      stop("unknown OS")
-   }
-   
-   res <- inner_join(ascores, job_to_dataset_map) %>%
-      rename(spectrumFile = Dataset)
-   
-   return(res)
+    }
+    dir.create(local_folder)
+    remote_folder <- gsub("\\\\","/",job['Folder'])
+    mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+    system(mount_cmd)
+    # read the stuff
+    ascores <- read_tsv(
+      file.path(local_folder,"Concatenated_msgfplus_syn_ascore.txt"))
+    job_to_dataset_map <- read_tsv(
+      file.path(local_folder,"Job_to_Dataset_Map.txt"))
+    # end of read the stuff
+    umount_cmd <- sprintf("umount %s", local_folder)
+    system(umount_cmd)
+    unlink(local_folder, recursive = TRUE)
+  }else if(.Platform$OS.type == "windows"){
+    # in case Windows
+    ascores <- read_tsv(
+      file.path(job['Folder'],"Concatenated_msgfplus_syn_ascore.txt"))
+    job_to_dataset_map <- read_tsv(
+      file.path(job['Folder'],"Job_to_Dataset_Map.txt"))
+  }else{
+    stop("unknown OS")
+  }
+  
+  res <- inner_join(ascores, job_to_dataset_map) %>%
+    rename(spectrumFile = Dataset)
+  
+  return(res)
 }
-
 
 # RODBC version
 # #' @export
@@ -375,6 +418,11 @@ get_job_records_by_dataset_package <- function(data_package_num)
 #' @export
 #' @rdname pnnl_dms_utils
 get_results_for_multiple_jobs <- function(jobRecords){
+  if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+    stop("The function `get_results_for_multiple_jobs` will likely crash your Mac!
+         (It is not compatible with macOS)")
+  }
+  
    toolName <- unique(jobRecords[["Tool"]])
    if (length(toolName) > 1){
       stop("Contains results of more then one tool.")
@@ -394,6 +442,10 @@ get_results_for_multiple_jobs_2.dt <- function(jobRecords){
    if (length(toolName) > 1) {
       stop("Contains results of more than one tool.")
    }
+   toolName = unique(jobRecords[["Tool"]])
+   if (length(toolName) > 1) {
+     stop("Contains results of more than one tool.")
+   }
    result <- list()
    for (fileNamePttrn in tool2suffix[[toolName]]){
       result[[fileNamePttrn]] <- llply(jobRecords[["Folder"]], get_results_for_single_job_2.dt, 
@@ -403,6 +455,28 @@ get_results_for_multiple_jobs_2.dt <- function(jobRecords){
    return(result)
 }
 
+#' @export
+#' @rdname pnnl_dms_utils
+get_results_for_multiple_jobs.dt <- function(jobRecords){
+  if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+    stop("The function `get_results_for_multiple_jobs.dt` will likely crash your Mac!
+         (It is not compatible with macOS)
+         Please use `get_results_for_multiple_jobs_2.dt` instead.
+         Both functions have the same interface.")
+  }
+  toolName = unique(jobRecords[["Tool"]])
+  if (length(toolName) > 1) {
+    stop("Contains results of more than one tool.")
+  }
+  result <- list()
+  for (fileNamePttrn in tool2suffix[[toolName]]){
+    result[[fileNamePttrn]] <- llply(jobRecords[["Folder"]], get_results_for_single_job.dt, 
+                                     fileNamePttrn = fileNamePttrn, .progress = "text") %>% 
+      rbindlist(fill = TRUE)    # fill = TRUE to handle differing numbers of columns in ScanStatsEx
+  }
+  return(result)
+}
+
 
 #' @export
 #' @rdname pnnl_dms_utils
@@ -410,6 +484,12 @@ get_results_for_single_job <- function(pathToFile, fileNamePttrn){
    pathToFile = list.files( path=as.character(pathToFile),
                             pattern=fileNamePttrn,
                             full.names=TRUE)
+   if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+     stop("The function `get_results_for_single_job` will likely crash your Mac!
+         (It is not compatible with macOS)")
+   }
+   
+   
    if(length(pathToFile) == 0){
       stop("can't find the results file")
    }
@@ -464,7 +544,7 @@ get_url_from_dir_and_file <- function(dir, file_name_segment) {
   file_name_regex <- paste(">([^\\/]*", file_name_pattern_escaped, "[^\\/]*)<", sep = "")
   file_name <- str_match(dir_listing_str, file_name_regex)[, -1]
   
-  complete_url <- paste(dir_path, "/", file_name, sep = "")
+  complete_url <- paste(dir_url, "/", file_name, sep = "")
   return(complete_url)
 }
 
@@ -476,10 +556,147 @@ get_results_for_single_job_2.dt <- function(pathToFile, fileNamePttrn) {
   url <- get_url_from_dir_and_file(pathToFile, fileNamePttrn)
   results <- read_tsv(url, col_types = readr::cols())
   
-  dataset <- strsplit(basename(pathToFile), split = fileNamePttrn)[[1]]
+  dataset <- strsplit(basename(url), split = fileNamePttrn)[[1]]
   out <- data.table(Dataset = dataset, results)
   return(out)
 }
+
+#' @export
+#' @rdname pnnl_dms_utils
+get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn){
+  if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+    stop("The function `get_results_for_single_job.dt` will likely crash your Mac!
+         (It is not compatible with macOS)
+         Please use `get_results_for_single_jobs.dt` instead.
+         Both functions have the same interface.")
+  }
+  pathToFile <- as.character(pathToFile)
+  if(.Platform$OS.type == "unix"){
+    local_folder <- "~/temp_msms_results"
+    if(file.exists(local_folder)){
+      unlink(local_folder, recursive = TRUE)
+    }
+    dir.create(local_folder)
+    remote_folder <- gsub("\\\\","/",pathToFile)
+    mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+    system(mount_cmd)
+  }else if(.Platform$OS.type == "windows"){
+    local_folder <- pathToFile
+  }else{
+    stop("Unknown OS type.")
+  }
+  
+  pathToFile <- list.files(path=local_folder,
+                           pattern=fileNamePttrn,
+                           full.names=TRUE)
+  if(length(pathToFile) == 0){
+    stop("can't find the results file")
+  }
+  if(length(pathToFile) > 1){
+    stop("ambiguous results files")
+  }
+  
+  results <- read_tsv(pathToFile, col_types=readr::cols(), progress=FALSE)
+  
+  if(.Platform$OS.type == "unix"){
+    umount_cmd <- sprintf("umount %s", local_folder)
+    system(umount_cmd)
+    unlink(local_folder, recursive = TRUE)
+  }
+  
+  dataset <- strsplit(basename(pathToFile), split=fileNamePttrn)[[1]]
+  out <- data.table(Dataset=dataset, results)
+  return(out)
+}
+
+
+
+#' @export
+#' @rdname pnnl_dms_utils
+# Returns path to FASTA. Note FASTA will be in temp directory.
+path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL){
+  
+  if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+    stop("The function `path_to_FASTA_used_by_DMS` will likely crash your Mac!
+         (It is not compatible with macOS)
+         Please use `path_to_FASTA_used_by_DMS_2` instead.
+         Both functions have the same interface.")
+  }
+  
+  
+  # make sure it was the same fasta used for all msgf jobs
+  # at this point this works only with one data package at a time
+  jobRecords <- get_job_records_by_dataset_package(data_package_num)
+  jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
+  # if(length(unique(jobRecords$`Organism DB`)) != 1){
+  #    stop("There should be exactly one FASTA file per data package!")
+  # }
+  
+  # All FASTA files
+  fasta_files <- unique(jobRecords$`Organism DB`)
+  # If organism_db is not provided, check that there are not multiple
+  # FASTA files.
+  if (is.null(organism_db)) {
+    if (length(fasta_files) != 1) {
+      stop(paste0("There are multiple FASTA files. Please specify ",
+                  "which one to return with organism_db:\n", 
+                  paste(fasta_files, collapse = "\n")))
+    } else {
+      organism_db <- fasta_files
+    }
+  }
+  # Filter to specific FASTA file
+  jobRecords <- jobRecords[jobRecords$`Organism DB` == organism_db, ]
+  
+  strSQL <- sprintf("Select [Organism DB],
+                             [Organism DB Storage Path]
+                     From V_Analysis_Job_Detail_Report_2
+                     Where Job = %s", jobRecords$Job[1])
+  
+  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
+                     get_driver(),
+                     get_auth())
+  
+  con <- dbConnect(odbc(), .connection_string=con_str)
+  qry <- dbSendQuery(con, strSQL)
+  res <- dbFetch(qry)
+  dbClearResult(qry)
+  dbDisconnect(con)
+  
+  temp_dir <- tempdir()
+  
+  # OS-specific download
+  if(.Platform$OS.type == "unix"){
+    local_folder <- "~/temp_fasta"
+    if(file.exists(local_folder)){
+      unlink(local_folder, recursive = TRUE)
+    }
+    dir.create(local_folder)
+    remote_folder <- gsub("\\\\","/",res['Organism DB Storage Path'])
+    mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+    system(mount_cmd)
+    # copy file
+    path_to_FASTA <- file.path(local_folder, res['Organism DB'])
+    file.copy(path_to_FASTA, temp_dir)
+    # end of copy file
+    umount_cmd <- sprintf("umount %s", local_folder)
+    system(umount_cmd)
+    unlink(local_folder, recursive = TRUE)
+  }else if(.Platform$OS.type == "windows"){
+    # in case of Windows
+    path_to_FASTA <- file.path(res['Organism DB Storage Path'],
+                               res['Organism DB'])
+    file.copy(path_to_FASTA, temp_dir)
+  }else{
+    stop("unknown OS")
+  }
+  
+  path_to_FASTA <- file.path(temp_dir, res['Organism DB'])
+  
+  return(path_to_FASTA)
+  
+}
+
 
 
 #' @export
@@ -533,12 +750,95 @@ path_to_FASTA_used_by_DMS_2 <- function(data_package_num, organism_db = NULL){
 }
 
 
+#' @export
+#' @rdname pnnl_dms_utils
+# gets 3 study design files from package directory
+get_study_design_by_dataset_package_2 <- function(data_package_num) {
+  
+  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
+                     get_driver(),
+                     get_auth())
+  con <- dbConnect(odbc(), .connection_string=con_str)
+  
+  ## fetch table with path to DataPackage
+  strSQL <- sprintf("
+                    SELECT *
+                    FROM V_Data_Package_Detail_Report
+                    WHERE ID = %s",
+                    data_package_num)
+  qry <- dbSendQuery(con, strSQL)
+  dataPkgReport <- dbFetch(qry)
+  dbClearResult(qry)
+  
+  if(.Platform$OS.type == "unix"){
+    local_folder <- "~/temp_study_des"
+    
+    remote_folder <- gsub("\\\\","/", dataPkgReport$`Share Path`)
+    remote_folder <- gsub("(", "\\(", remote_folder, fixed = TRUE)
+    remote_folder <- gsub(")", "\\)", remote_folder, fixed = TRUE)
+
+  }else if(.Platform$OS.type == "windows"){
+    local_folder <- dataPkgReport$`Share Path`
+  }else{
+    stop("Unknown OS type.")
+  }
+  
+  ## fetch samples.txt
+  samples_filename <- "samples.txt"
+  
+  samples_url <- get_url_from_dir_and_file(remote_folder, samples_filename)
+                           
+  samples <- readr::read_tsv(samples_url, col_types=readr::cols(.default = "c"), progress=FALSE)
+  if (!setequal(colnames(samples), c("PlexID",
+                                     "QuantBlock",
+                                     "ReporterAlias",
+                                     "ReporterName",
+                                     "MeasurementName"))) {
+    stop("There are incorrect column names or missing columns in the 'samples'
+         study design table.")
+  }
+  
+  ## fetch fractions.txt
+  fractions_filename <- "fractions.txt"
+  
+  samples_url <- get_url_from_dir_and_file(remote_folder, fractions_filename)
+  
+  fractions <- readr::read_tsv(samples_url, col_types=readr::cols(.default = "c"), progress=FALSE)
+  if (!setequal(colnames(fractions), c("PlexID",
+                                       "Dataset"))) {
+    stop("There are incorrect column names or missing columns in the 'fractions'
+         study design table.")
+  }
+  
+  references_filename <- "references.txt"
+  
+  references_url <- get_url_from_dir_and_file(remote_folder, references_filename)
+  
+  references <- readr::read_tsv(references_url, col_types=readr::cols(.default = "c"), progress=FALSE)
+  if (!setequal(colnames(references), c("PlexID",
+                                        "QuantBlock",
+                                        "Reference"))) {
+    stop("There are incorrect column names or missing columns in the 'references'
+         study design table.")
+  }
+  
+  study_des <- list(samples = samples,
+                    fractions = fractions,
+                    references = references)
+  return(study_des)
+}
 
 
 #' @export
 #' @rdname pnnl_dms_utils
 # gets 3 study design files from package directory
 get_study_design_by_dataset_package <- function(data_package_num) {
+  if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+    stop("The function `get_study_design_by_dataset_package` will likely crash your Mac!
+         (It is not compatible with macOS)
+         Please use `get_study_design_by_dataset_package_2` instead.
+         Both functions have the same interface.")
+  }
    
    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
                       get_driver(),

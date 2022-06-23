@@ -61,7 +61,7 @@ read_AScore_results_from_DMS <- function(data_package_num){
     job_to_dataset_map <- read_tsv_helper(
       file.path(local_folder,"Job_to_Dataset_Map.txt"))
     # end of read the stuff
-    umount_cmd <- sprintf("umount %s", local_folder)
+    umount_cmd <- sprintf("diskutil unmount %s", local_folder)
     system(umount_cmd)
     unlink(local_folder, recursive = T)
   }else if(.Platform$OS.type == "windows"){

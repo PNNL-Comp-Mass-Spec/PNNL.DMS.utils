@@ -35,6 +35,14 @@ read_msgf_data_from_DMS <- function(data_package_num,
                                     param_file = NULL,
                                     organism_db = NULL,
                                     use_mzIdentML = FALSE) {
+  
+  if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
+    stop("The function `read_msgf_data_from_DMS` will likely crash your Mac!
+         (It is not compatible with macOS)
+         Please use `read_msgf_data_from_DMS_2` instead.
+         Both functions have the same interface.")
+  }
+  
   # Fetch job records for data package(s)
   if (length(data_package_num) > 1) {
     job_rec_ls <- lapply(data_package_num, get_job_records_by_dataset_package)
@@ -115,13 +123,7 @@ read_msgf_data_from_DMS <- function(data_package_num,
 }
 
 
-
-
-
-
-
-
-
+#' @export
 read_msgf_data_from_DMS_2 <- function(data_package_num, 
                                     param_file = NULL,
                                     organism_db = NULL,
@@ -196,7 +198,7 @@ read_msgf_data_from_DMS_2 <- function(data_package_num,
       msnid <- MSnID::read_mzIDs(MSnID(), mzid_files, backend = "mzR")
     )
   } else {
-    results <- get_results_for_multiple_jobs.dt(jobRecords) 
+    results <- get_results_for_multiple_jobs_2.dt(jobRecords) 
     tool <- unique(jobRecords$Tool)
     pattern <- tool2suffix[[tool]]
     results <- results[[pattern]]
@@ -204,9 +206,3 @@ read_msgf_data_from_DMS_2 <- function(data_package_num,
   }
   return(msnid)
 }
-
-
-
-
-
-
