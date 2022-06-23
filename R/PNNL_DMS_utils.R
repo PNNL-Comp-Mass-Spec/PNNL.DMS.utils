@@ -534,10 +534,11 @@ get_url_from_dir_and_file <- function(dir, file_name_segment) {
   dir_url <- sub("\\/\\/([^\\/]+)\\/", "https:\\/\\/\\1.pnl.gov/", dir)
   
   # Download directory listing; turn it into string
-  download.file(paste(dir_url, "/", sep = ""), destfile = "temp_dir_listing.html", quiet = TRUE) 
-  dir_listing_vec <- scan("temp_dir_listing.html", what = "character", quiet = TRUE)
+  temp_filepath <- paste(tempfile(), ".html", sep = "")
+  download.file(paste(dir_url, "/", sep = ""), destfile = temp_filepath, quiet = TRUE) 
+  dir_listing_vec <- scan(temp_filepath, what = "character", quiet = TRUE)
   dir_listing_str <- paste(dir_listing_vec, sep = "", collapse = "")
-  unlink("temp_dir_listing.html")
+  unlink(temp_filepath)
   
   # Build up full URL
   file_name_pattern_escaped <- str_replace_all(file_name_segment, "(\\W)", "\\\\\\1")
@@ -744,8 +745,11 @@ path_to_FASTA_used_by_DMS_2 <- function(data_package_num, organism_db = NULL){
    dbDisconnect(con)
    
    url <- get_url_from_dir_and_file(res['Organism DB Storage Path'], res['Organism DB'])
+   temp_filepath <- paste(tempfile(), ".fasta", sep = "")
+   message("Pre-downloading FASTA file to local tempdir (and returning local path)")
+   curl::curl_download(url, destfile = temp_filepath, quiet = F)
    
-   return(url)
+   return(temp_filepath)
    
 }
 
