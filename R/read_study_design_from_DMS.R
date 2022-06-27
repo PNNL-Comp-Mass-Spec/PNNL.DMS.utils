@@ -12,6 +12,7 @@
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
 #' @importFrom readr read_tsv cols
+#' @importFrom utils write.table
 #' @name read_study_design
 #'
 #' @examples
@@ -65,7 +66,7 @@ read_study_design_from_DMS <- function(data_package_num) {
   
   local_folder <- path_to_study_design_from_DMS(data_package_num)
   filenames <- c("fractions.txt", "samples.txt", "references.txt")
-
+  
   results <- lapply(filenames, function(filename) {
     pathToFile <- list.files(path = local_folder,
                              pattern = filename,
@@ -73,9 +74,9 @@ read_study_design_from_DMS <- function(data_package_num) {
     if (length(pathToFile) == 0) {
       stop(filename, " not found.")
     }
-    df <- read_tsv_helper(pathToFile,
-                   col_types = cols(.default = "c"),
-                   progress = FALSE)
+    df <- read_tsv(pathToFile,
+                          col_types = cols(.default = "c"),
+                          progress = FALSE)
     df <- as.data.frame(df)
   })
   names(results) <- sub(".txt", "", filenames)

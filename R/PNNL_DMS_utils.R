@@ -16,7 +16,6 @@
 #' * `get_results_for_multiple_jobs.dt()`: returns results as concatenated data.table given job numbers
 #' * `get_results_for_single_job()`: returns results given job number
 #' * `get_results_for_single_job.dt()`: returns results as data.table given job number
-#' * `read_tsv_helper()`: prevents macOS unmount error by copying file to local folder before reading .tsv file
 #' @md
 #'
 #'
@@ -42,11 +41,12 @@
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
 #' @importFrom plyr ldply
-#' @importFrom dplyr %>% rename
+#' @importFrom dplyr %>% rename filter
 #' @importFrom readr read_tsv
 #' @importFrom data.table data.table rbindlist
-#' @importFrom utils read.delim tail
+#' @importFrom utils read.delim tail download.file
 #' @importFrom stringr str_match_all str_match str_replace_all str_replace
+#' @importFrom curl curl_download
 #'
 #'
 #' @name pnnl_dms_utils
@@ -940,28 +940,8 @@ get_study_design_by_dataset_package <- function(data_package_num) {
    return(study_des)
 }
 
-#' @export
-#' @rdname pnnl_dms_utils
-read_tsv_helper <- function(pathToFile, ...) {
-  read_tsv_helper_local_dir <- "~/read_tsv_helper_local_dir"
-  if (file.exists(read_tsv_helper_local_dir)) {
-    unlink(read_tsv_helper_local_dir, recursive = TRUE)
-  }
-  dir.create(read_tsv_helper_local_dir)
-  print("Copying remote file to local temporary directory.")
-  system(sprintf("cd %s", read_tsv_helper_local_dir))
-  temp_filename <- paste(read_tsv_helper_local_dir, "/local_cp.txt", sep = "")
-  cmd <- sprintf(
-    "rsync --progress %s %s",
-    pathToFile,
-    temp_filename)
-  system(cmd)
-  system("cd ~")
-  result <- read_tsv(
-    temp_filename,
-    ...
-  )
-  unlink(read_tsv_helper_local_dir, recursive = TRUE)
-  return(result)
-}
+
+# Prevent "no visible binding for global variable" note.
+utils::globalVariables(c("Tool"))
+
 

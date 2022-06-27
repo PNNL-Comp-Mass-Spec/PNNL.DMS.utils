@@ -20,7 +20,7 @@
 #' @md
 #'
 #' @importFrom MSnID convert_msgf_output_to_msnid read_mzIDs MSnID
-#' @importFrom data.table data.table
+#' @importFrom data.table data.table rbindlist
 #'
 #' @examples
 #' msnid <- read_msgf_data_from_DMS(3606)
@@ -46,7 +46,7 @@ read_msgf_data_from_DMS <- function(data_package_num,
   # Fetch job records for data package(s)
   if (length(data_package_num) > 1) {
     job_rec_ls <- lapply(data_package_num, get_job_records_by_dataset_package)
-    jobRecords <- Reduce(rbind, job_rec_ls)
+    jobRecords <- rbindlist(job_rec_ls)
   } else {
     jobRecords <- get_job_records_by_dataset_package(data_package_num)
   }
@@ -131,7 +131,7 @@ read_msgf_data_from_DMS_2 <- function(data_package_num,
   # Fetch job records for data package(s)
   if (length(data_package_num) > 1) {
     job_rec_ls <- lapply(data_package_num, get_job_records_by_dataset_package)
-    jobRecords <- Reduce(rbind, job_rec_ls)
+    jobRecords <- rbindlist(job_rec_ls)
   } else {
     jobRecords <- get_job_records_by_dataset_package(data_package_num)
   }

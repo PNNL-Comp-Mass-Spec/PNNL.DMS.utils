@@ -16,6 +16,8 @@ Imports:
    odbc,
    plyr,
    readr,
-   utils
+   stringr,
+   utils,
+   curl
 Remotes:
    github::PNNL-Comp-Mass-Spec/MSnID@pnnl-master

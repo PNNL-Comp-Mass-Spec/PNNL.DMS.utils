@@ -11,6 +11,7 @@
 #' @return (data.frame) with reporter ion intensities and other metrics
 #' 
 #' @importFrom dplyr select contains starts_with
+#' @importFrom data.table rbindlist
 #' 
 #' @export read_masic_data_from_DMS
 #' @export read_masic_data_from_DMS_2
@@ -35,7 +36,7 @@ read_masic_data_from_DMS <- function(data_package_num, interference_score=FALSE,
    # Fetch job records for data package(s)
    if(length(data_package_num) > 1){
       jobRecords <- lapply(data_package_num, get_job_records_by_dataset_package)
-      jobRecords <- Reduce(rbind, jobRecords)
+      jobRecords <- rbindlist(jobRecords)
    } else {
       jobRecords <- get_job_records_by_dataset_package(data_package_num)
    }
@@ -86,7 +87,7 @@ read_masic_data_from_DMS_2 <- function(data_package_num, interference_score=FALS
   # Fetch job records for data package(s)
   if(length(data_package_num) > 1){
     jobRecords <- lapply(data_package_num, get_job_records_by_dataset_package)
-    jobRecords <- Reduce(rbind, jobRecords)
+    jobRecords <- rbindlist(jobRecords)
   } else {
     jobRecords <- get_job_records_by_dataset_package(data_package_num)
   }

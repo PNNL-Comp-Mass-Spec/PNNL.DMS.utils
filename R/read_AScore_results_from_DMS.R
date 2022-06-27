@@ -41,8 +41,8 @@ read_AScore_results_from_DMS <- function(data_package_num){
   dbDisconnect(con)
   
   if(nrow(job) > 1){
-    warning("Multiple Ascore jobs detected. Selecting the last one.")
     job <- tail(job, 1)
+    warning(paste0("Multiple Ascore jobs detected. Selecting the last one: ", job[["Job"]]))
   }
   
   # in case Mac OS
@@ -56,9 +56,9 @@ read_AScore_results_from_DMS <- function(data_package_num){
     mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
     system(mount_cmd)
     # read the stuff
-    ascores <- read_tsv_helper(
+    ascores <- read_tsv(
       file.path(local_folder,"Concatenated_msgfplus_syn_ascore.txt"))
-    job_to_dataset_map <- read_tsv_helper(
+    job_to_dataset_map <- read_tsv(
       file.path(local_folder,"Job_to_Dataset_Map.txt"))
     # end of read the stuff
     umount_cmd <- sprintf("diskutil unmount %s", local_folder)
@@ -79,3 +79,9 @@ read_AScore_results_from_DMS <- function(data_package_num){
   
   return(res)
 }
+
+
+# Prevent "no visible binding for global variable" note.
+utils::globalVariables(c("Tool"))
+
+
