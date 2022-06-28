@@ -18,6 +18,7 @@ Imports:
    readr,
    stringr,
    utils,
-   curl
+   curl,
+   RCurl
 Remotes:
    github::PNNL-Comp-Mass-Spec/MSnID@pnnl-master
