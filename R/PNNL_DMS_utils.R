@@ -510,12 +510,12 @@ get_url_from_dir_and_file <- function(dir, file_name_segment) {
   file_name_regex <- paste(">([^\\/]*", file_name_pattern_escaped, "[^\\/]*)<", sep = "")
   file_name <- str_match(dir_listing_str, file_name_regex)[, -1]
   if(is.na(file_name)){
-    first_part_of_filnme <- str_match(dir_url, ".*\\/(.*)\\/[^\\/]*$")[, -1]
+    first_part_of_filnme <- sub(".*\\/([^\\/]+)\\/[^\\/]*$", "\\1", dir_url)
     file_name <- paste(first_part_of_filnme, file_name_segment, sep = "")
   }
   
   complete_url <- paste(dir_url, "/", file_name, sep = "")
-  if (!url.exists(complete_url)){
+  if (!RCurl::url.exists(complete_url)){
     stop("Requested URL does not exist.")
   }
   return(complete_url)
