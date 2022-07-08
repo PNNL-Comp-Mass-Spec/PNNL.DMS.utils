@@ -6,13 +6,17 @@
 #'
 #' @description 
 #' 
+#' * `path_to_study_design_from_DMS()`: gets location of study design files from
+#' the DMS.
+#' 
 #' * `read_study_design_from_DMS()`: reads study design tables from the DMS data
 #' package folder.
 #' 
-#' * `write_study_design_tables()`: writes study design tables to the DMS so
+#' * `write_study_design_to_DMS()`: writes study design tables to the DMS so
 #' that they can be accessed by others.
 #'
 #' @param data_package_num (integer) data package number for DMS
+#' @param useHTTP (logical) whether to...
 #' @param study_design (list) study design files: fractions, samples, and
 #'   references.
 #' @param overwrite (logical) whether to replace any existing study design
@@ -35,49 +39,51 @@
 #' references <- study_design$references
 
 
-# #' @export
-# #' @rdname read_study_design
-# path_to_study_design_from_DMS <- function(data_package_num) {
-#   
-#   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
-#                      get_driver(),
-#                      get_auth())
-#   con <- dbConnect(odbc(), .connection_string=con_str)
-#   
-#   ## fetch table with path to DataPackage
-#   strSQL <- sprintf("
-#                     SELECT *
-#                     FROM V_Data_Package_Detail_Report
-#                     WHERE ID = %s",
-#                     data_package_num)
-#   qry <- dbSendQuery(con, strSQL)
-#   dataPkgReport <- dbFetch(qry)
-#   dbClearResult(qry)
-#   
-#   if(.Platform$OS.type == "unix"){
-#     local_folder <- "~/temp_study_des"
-#     if(file.exists(local_folder)){
-#       unlink(local_folder, recursive = T)
-#     }
-#     dir.create(local_folder)
-#     
-#     remote_folder <- gsub("\\\\","/", dataPkgReport$`Share Path`)
-#     remote_folder <- gsub("(", "\\(", remote_folder, fixed = T)
-#     remote_folder <- gsub(")", "\\)", remote_folder, fixed = T)
-#     mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
-#     system(mount_cmd)
-#   }else if(.Platform$OS.type == "windows"){
-#     local_folder <- dataPkgReport$`Share Path`
-#   }else{
-#     stop("Unknown OS type.")
-#   }
-#   return(local_folder)
-# }
+#' @export
+#' @rdname read_study_design
+path_to_study_design_from_DMS <- function(data_package_num,
+                                          useHTTP = FALSE) 
+{
+  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
+                     get_driver(),
+                     get_auth())
+  con <- dbConnect(odbc(), .connection_string=con_str)
+  
+  ## fetch table with path to DataPackage
+  strSQL <- sprintf("
+                    SELECT *
+                    FROM V_Data_Package_Detail_Report
+                    WHERE ID = %s",
+                    data_package_num)
+  qry <- dbSendQuery(con, strSQL)
+  dataPkgReport <- dbFetch(qry)
+  dbClearResult(qry)
+  
+  if(.Platform$OS.type == "unix" | useHTTP){
+    local_folder <- "~/temp_study_des"
+    if(file.exists(local_folder)){
+      unlink(local_folder, recursive = T)
+    }
+    dir.create(local_folder)
+    
+    remote_folder <- gsub("\\\\","/", dataPkgReport$`Share Path`)
+    remote_folder <- gsub("(", "\\(", remote_folder, fixed = T)
+    remote_folder <- gsub(")", "\\)", remote_folder, fixed = T)
+    mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+    system(mount_cmd)
+  }else if(.Platform$OS.type == "windows"){
+    local_folder <- dataPkgReport$`Share Path`
+  }else{
+    stop("Unknown OS type.")
+  }
+  return(local_folder)
+}
 
 
 #' @export
 #' @rdname read_study_design
-read_study_design_from_DMS <- function(data_package_num) 
+read_study_design_from_DMS <- function(data_package_num,
+                                       useHTTP = FALSE) 
 {
   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
                      get_driver(),
@@ -107,7 +113,7 @@ read_study_design_from_DMS <- function(data_package_num)
   study_design_files <- paste0("^", names(required_cols), ".txt$")
   
   
-  if(.Platform$OS.type == "unix"){
+  if(.Platform$OS.type == "unix" | useHTTP){
     local_folder <- "~/temp_study_des"
     
     remote_folder <- gsub("\\\\","/", dataPkgReport$`Share Path`)

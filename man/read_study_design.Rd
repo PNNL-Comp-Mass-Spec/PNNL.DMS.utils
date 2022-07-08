@@ -2,16 +2,21 @@
 % Please edit documentation in R/read_study_design_from_DMS.R
 \name{read_study_design}
 \alias{read_study_design}
+\alias{path_to_study_design_from_DMS}
 \alias{read_study_design_from_DMS}
 \alias{write_study_design_to_DMS}
 \title{Reading and Writing Study Design Tables}
 \usage{
-read_study_design_from_DMS(data_package_num)
+path_to_study_design_from_DMS(data_package_num, useHTTP = FALSE)
+
+read_study_design_from_DMS(data_package_num, useHTTP = FALSE)
 
 write_study_design_to_DMS(data_package_num, study_design, overwrite = FALSE)
 }
 \arguments{
 \item{data_package_num}{(integer) data package number for DMS}
+
+\item{useHTTP}{(logical) whether to...}
 
 \item{study_design}{(list) study design files: fractions, samples, and
 references.}
@@ -25,9 +30,11 @@ files are internally consistent. DMS functionality not useful outside of PNNL
 unless connected through VPN.
 
 \itemize{
+\item \code{path_to_study_design_from_DMS()}: gets location of study design files from
+the DMS.
 \item \code{read_study_design_from_DMS()}: reads study design tables from the DMS data
 package folder.
-\item \code{write_study_design_tables()}: writes study design tables to the DMS so
+\item \code{write_study_design_to_DMS()}: writes study design tables to the DMS so
 that they can be accessed by others.
 }
 }
