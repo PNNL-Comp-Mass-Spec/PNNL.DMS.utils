@@ -40,10 +40,13 @@
 #'        one FASTA file associated with the jobs.
 #' @param dir placeholder
 #' @param file_name_segment placeholder
+#' @param expected_multiple_files do we expect multiple files for a single job or not. Default is FALSE.
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
 #' @importFrom plyr ldply
 #' @importFrom dplyr %>% rename filter
+#' @importFrom tidyr unnest
+#' @importFrom tibble enframe
 #' @importFrom readr read_tsv
 #' @importFrom data.table data.table rbindlist
 #' @importFrom utils read.delim tail download.file
@@ -446,15 +449,18 @@ get_results_for_multiple_jobs <- function(jobRecords){
 
 #' @export
 #' @rdname pnnl_dms_utils
-get_results_for_multiple_jobs.dt <- function(jobRecords){
+get_results_for_multiple_jobs.dt <- function(jobRecords, expected_multiple_files = FALSE){
   toolName = unique(jobRecords[["Tool"]])
   if (length(toolName) > 1) {
     stop("Contains results of more than one tool.")
   }
   result <- list()
   for (fileNamePttrn in tool2suffix[[toolName]]){
-    result[[fileNamePttrn]] <- llply(jobRecords[["Folder"]], get_results_for_single_job.dt, 
-                                     fileNamePttrn = fileNamePttrn, .progress = "text") %>% 
+    result[[fileNamePttrn]] <- llply(jobRecords[["Folder"]], 
+                                     get_results_for_single_job.dt, 
+                                     fileNamePttrn = fileNamePttrn, 
+                                     expected_multiple_files = expected_multiple_files, 
+                                     .progress = "text") %>% 
       rbindlist(fill = TRUE)    # fill = TRUE to handle differing numbers of columns in ScanStatsEx
   }
   return(result)
@@ -524,7 +530,7 @@ get_url_from_dir_and_file <- function(dir, file_name_segment) {
 
 #' @export
 #' @rdname pnnl_dms_utils
-get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn)
+get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn, expected_multiple_files = FALSE)
 {
   pathToFile <- as.character(pathToFile)
   
@@ -539,17 +545,37 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn)
     stop("Unknown OS type.")
   }
   
-  if(length(pathToFile) == 0){
+  # if(length(pathToFile) == 0){
+  #   stop("can't find the results file")
+  # }
+  # if(length(pathToFile) > 1){
+  #   stop("ambiguous results files")
+  # }
+  # 
+  # results <- read_tsv(pathToFile, col_types=readr::cols(), progress=FALSE)
+  # 
+  # dataset <- strsplit(basename(pathToFile), split=fileNamePttrn)[[1]]
+  # out <- data.table(Dataset=dataset, results)
+  # return(out)
+  
+  # checks all the file number problems
+  if (length(pathToFile) == 0) {
     stop("can't find the results file")
   }
-  if(length(pathToFile) > 1){
+  if (length(pathToFile) > 1 & !expected_multiple_files) {
     stop("ambiguous results files")
   }
   
-  results <- read_tsv(pathToFile, col_types=readr::cols(), progress=FALSE)
-  
-  dataset <- strsplit(basename(pathToFile), split=fileNamePttrn)[[1]]
-  out <- data.table(Dataset=dataset, results)
+  short_dataset_names <- unlist(strsplit(basename(pathToFile), split = fileNamePttrn))
+  out <- llply(pathToFile, 
+               read_tsv,
+               col_types = readr::cols(),
+               guess_max = Inf,
+               progress = FALSE) %>%
+    setNames(short_dataset_names) %>%
+    enframe(name = "Dataset") %>% 
+    unnest(value) %>%
+    data.table()
   return(out)
 }
 

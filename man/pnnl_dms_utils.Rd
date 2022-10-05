@@ -54,13 +54,17 @@ get_job_records_by_dataset_package(data_package_num)
 
 get_results_for_multiple_jobs(jobRecords)
 
-get_results_for_multiple_jobs.dt(jobRecords)
+get_results_for_multiple_jobs.dt(jobRecords, expected_multiple_files = FALSE)
 
 get_results_for_single_job(pathToFile, fileNamePttrn)
 
 get_url_from_dir_and_file(dir, file_name_segment)
 
-get_results_for_single_job.dt(pathToFile, fileNamePttrn)
+get_results_for_single_job.dt(
+  pathToFile,
+  fileNamePttrn,
+  expected_multiple_files = FALSE
+)
 
 path_to_FASTA_used_by_DMS(data_package_num, organism_db = NULL)
 
@@ -96,6 +100,8 @@ read_AScore_results_from_DMS(data_package_num)
 \item{data_package_num}{(Numeric or Character vector) containing Data Package ID(s) located in DMS}
 
 \item{jobRecords}{placeholder}
+
+\item{expected_multiple_files}{do we expect multiple files for a single job or not. Default is FALSE.}
 
 \item{pathToFile}{placeholder}
 
