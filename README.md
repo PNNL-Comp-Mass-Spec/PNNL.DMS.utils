@@ -23,8 +23,10 @@ Note, the `--with-unixodbc` option in freetds installation is deprecated.
 Create `~/.odbcinst.ini` file and add
 ```INI
 [FreeTDS]
-Driver = /usr/local/lib/libtdsodbc.so
+Driver = <driver_location>
 ```
+On Intel-based Macs, `<driver_location>` is `/usr/local/lib/libtdsodbc.so`. On M Series-based Macs, `<driver_location>` is `/opt/homebrew/lib/libtdsodbc.so`.
+
 If your location of `libtdsodbc.so` differs, use the proper location.
 
 ### Installation Tips
