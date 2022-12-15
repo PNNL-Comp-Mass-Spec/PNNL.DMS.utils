@@ -10,7 +10,7 @@
 #' 
 #' @return (data.frame) with reporter ion intensities and other metrics
 #' 
-#' @importFrom dplyr select contains starts_with
+#' @importFrom dplyr select contains starts_with any_of rename
 #' @importFrom data.table rbindlist
 #' 
 #' @export read_masic_data_from_DMS
@@ -39,27 +39,25 @@ read_masic_data_from_DMS <- function(data_package_num,
   # select relevant columns from df, drop redundant dataset column (select(-2))
   masicList <- get_results_for_multiple_jobs.dt(jobRecords)
   masicData <- masicList[["_ReporterIons.txt"]] %>% 
-    select(-2) %>% 
     select(Dataset, 
            ScanNumber, 
            starts_with("Ion"), 
            -contains("Resolution"))
   
   if (id_quant_table) {
-    quantIDTable <- make_id_to_quant_scan_link_table(masicList[["_ScanStatsEx.txt"]][,-2]) %>%
-      rename(ScanNumber = QuantScan)
+    quantIDTable <- make_id_to_quant_scan_link_table(masicList[["_ScanStatsEx.txt"]]) %>%
+      dplyr::rename(any_of(c("ScanNumber" = "QuantScan")))
     masicData <- inner_join(quantIDTable, masicData, 
                             by = c("Dataset", "ScanNumber")) %>%    
       select(-ScanNumber) %>%    
-      rename(ScanNumber = IDScan)
+      dplyr::rename(ScanNumber = IDScan)
   }
   
   if (interference_score) {
     masicStats <- masicList[["_SICstats.txt"]] %>% 
-      select(-2) %>%
-      select(Dataset, 
-             ScanNumber = FragScanNumber, 
-             contains("InterferenceScore"))
+      # select(-2) %>%
+      dplyr::rename(any_of(c("ScanNumber" = "FragScanNumber"))) %>% 
+      select(Dataset, ScanNumber, contains("InterferenceScore"))
     masicData <- inner_join(masicData, masicStats, 
                             by = c("Dataset", "ScanNumber"))
   }

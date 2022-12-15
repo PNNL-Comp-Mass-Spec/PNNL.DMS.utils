@@ -44,7 +44,7 @@
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
 #' @importFrom plyr ldply
-#' @importFrom dplyr %>% rename filter
+#' @importFrom dplyr %>% rename filter select one_of
 #' @importFrom tidyr unnest
 #' @importFrom tibble enframe
 #' @importFrom readr read_tsv
@@ -566,12 +566,14 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn, expected_mu
     stop("ambiguous results files")
   }
   
-  short_dataset_names <- unlist(strsplit(basename(pathToFile), split = fileNamePttrn))
+  short_dataset_names <- unlist(strsplit(basename(pathToFile), 
+                                         split = fileNamePttrn))
   out <- llply(pathToFile, 
                read_tsv,
                col_types = readr::cols(),
                guess_max = Inf,
                progress = FALSE) %>%
+    lapply(function(xi) { dplyr::select(xi, -one_of("Dataset"))}) %>%
     setNames(short_dataset_names) %>%
     enframe(name = "Dataset") %>% 
     unnest(value) %>%
