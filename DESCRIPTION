@@ -13,6 +13,7 @@ Imports:
    MSnID,
    data.table,
    dplyr,
+   purrr,
    odbc,
    plyr,
    readr,
