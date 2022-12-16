@@ -44,7 +44,7 @@
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
 #' @importFrom plyr ldply
-#' @importFrom dplyr %>% rename filter select one_of
+#' @importFrom dplyr %>% rename filter select any_of
 #' @importFrom tidyr unnest
 #' @importFrom tibble enframe
 #' @importFrom readr read_tsv
@@ -53,6 +53,7 @@
 #' @importFrom stringr str_match_all str_match str_replace_all str_replace
 #' @importFrom curl curl_download
 #' @importFrom RCurl url.exists
+#' @importFrom purrr map
 #'
 #' @name pnnl_dms_utils
 #'
@@ -573,7 +574,8 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn, expected_mu
                col_types = readr::cols(),
                guess_max = Inf,
                progress = FALSE) %>%
-    lapply(function(xi) { dplyr::select(xi, -one_of("Dataset"))}) %>%
+    #lapply(function(xi) { dplyr::select(xi, -one_of("Dataset"))}) %>%
+    map(dplyr::select, -any_of("Dataset")) %>%
     setNames(short_dataset_names) %>%
     enframe(name = "Dataset") %>% 
     unnest(value) %>%
