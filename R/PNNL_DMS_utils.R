@@ -637,7 +637,6 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
   } else {
     res <- dbFetch(qry)
   }
-  res <- dbFetch(qry)
   dbClearResult(qry)
   dbDisconnect(con)
   
