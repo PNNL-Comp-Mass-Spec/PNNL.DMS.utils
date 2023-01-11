@@ -627,7 +627,9 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
   qry <- try(dbSendQuery(con, strSQL))
   if (class(qry) == "try-error"){
     organism <- unique(jobRecords$Organism)
-    FASTA_name <- paste0(unique(jobRecords$`Protein Collection List`), ".fasta")
+    FASTA_name <- unique(jobRecords$`Protein Collection List`)
+    FASTA_name <- sub("(^.*),.*$", "\\1", FASTA_name)
+    FASTA_name <- paste0(FASTA_name, ".fasta")
     strSQL2 <- sprintf("Select OG_name,\n OG_organismDBPath\n From T_organisms\n Where OG_name = '%s'", 
                        organism)
     qry <- dbSendQuery(con, strSQL2)
