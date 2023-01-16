@@ -634,8 +634,8 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
                        organism)
     qry <- dbSendQuery(con, strSQL2)
     res <- dbFetch(qry)
-    res["ogranism_db_storage_path"] = res["OG_organismDBPath"]
-    res["ogranism_db"] = FASTA_name
+    res["organism_db_storage_path"] = res["OG_organismDBPath"]
+    res["organism_db"] = FASTA_name
   } else {
     res <- dbFetch(qry)
   }
@@ -646,7 +646,7 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
   
   # OS-specific download
   if (.Platform$OS.type == "unix") {
-    url <- get_url_from_dir_and_file(res['ogranism_db_storage_path'],
+    url <- get_url_from_dir_and_file(res['organism_db_storage_path'],
                                      res['organism_db'])
     temp_filepath <- paste(tempfile(), ".fasta", sep = "")
     message("Pre-downloading FASTA file to local tempdir (and returning local path)")
@@ -654,10 +654,10 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
     path_to_FASTA <- url
     
   } else if (.Platform$OS.type == "windows") {
-    path_to_FASTA <- file.path(res['ogranism_db_storage_path'],
-                               res['ogranism_db'])
+    path_to_FASTA <- file.path(res['organism_db_storage_path'],
+                               res['organism_db'])
     file.copy(path_to_FASTA, temp_dir)
-    path_to_FASTA <- file.path(temp_dir, res['ogranism_db'])
+    path_to_FASTA <- file.path(temp_dir, res['organism_db'])
     
   } else {
     stop("unknown OS")
