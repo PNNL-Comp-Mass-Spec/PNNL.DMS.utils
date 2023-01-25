@@ -624,21 +624,8 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
                      get_auth())
   
   con <- dbConnect(odbc(), .connection_string=con_str)
-  qry <- try(dbSendQuery(con, strSQL))
-  if (class(qry) == "try-error"){
-    organism <- unique(jobRecords$Organism)
-    FASTA_name <- unique(jobRecords$`Protein Collection List`)
-    FASTA_name <- sub("(^.*),.*$", "\\1", FASTA_name)
-    FASTA_name <- paste0(FASTA_name, ".fasta")
-    strSQL2 <- sprintf("Select OG_name,\n OG_organismDBPath\n From T_organisms\n Where OG_name = '%s'", 
-                       organism)
-    qry <- dbSendQuery(con, strSQL2)
-    res <- dbFetch(qry)
-    res["organism_db_storage_path"] = res["OG_organismDBPath"]
-    res["organism_db"] = FASTA_name
-  } else {
-    res <- dbFetch(qry)
-  }
+  qry <- dbSendQuery(con, strSQL)
+  res <- dbFetch(qry)
   dbClearResult(qry)
   dbDisconnect(con)
   
