@@ -614,8 +614,8 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
   # Filter to specific FASTA file
   jobRecords <- jobRecords[jobRecords$`Organism DB` == organism_db, ]
   
-  strSQL <- sprintf("Select [Organism DB],
-                             [Organism DB Storage Path]
+  strSQL <- sprintf("Select organism_db,
+                            organism_db_storage_path
                      From V_Analysis_Job_Detail_Report_2
                      Where Job = %s", jobRecords$Job[1])
   
@@ -633,18 +633,18 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
   
   # OS-specific download
   if (.Platform$OS.type == "unix") {
-    url <- get_url_from_dir_and_file(res['Organism DB Storage Path'],
-                                     res['Organism DB'])
+    url <- get_url_from_dir_and_file(res['organism_db_storage_path'],
+                                     res['organism_db'])
     temp_filepath <- paste(tempfile(), ".fasta", sep = "")
     message("Pre-downloading FASTA file to local tempdir (and returning local path)")
     curl_download(url, destfile = temp_filepath, quiet = F)
     path_to_FASTA <- url
     
   } else if (.Platform$OS.type == "windows") {
-    path_to_FASTA <- file.path(res['Organism DB Storage Path'],
-                               res['Organism DB'])
+    path_to_FASTA <- file.path(res['organism_db_storage_path'],
+                               res['organism_db'])
     file.copy(path_to_FASTA, temp_dir)
-    path_to_FASTA <- file.path(temp_dir, res['Organism DB'])
+    path_to_FASTA <- file.path(temp_dir, res['organism_db'])
     
   } else {
     stop("unknown OS")
