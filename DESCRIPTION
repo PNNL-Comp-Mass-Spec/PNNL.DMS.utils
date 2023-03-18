@@ -1,14 +1,14 @@
 Package: PNNL.DMS.utils
 Type: Package
 Title: Tools for accessing PNNL's Data Management System
-Version: 0.1.8
+Version: 0.1.9
 Author: Vladislav Petyuk, Michael Nestor, Jamie Moon
 Maintainer: Vladislav Petyuk <vladislav.petyuk@pnnl.gov>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: Artistic-2.0
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 Imports:
    MSnID,
    data.table,
