@@ -8,7 +8,8 @@ read_msfragger_data_from_DMS(
   data_package_num,
   param_file = NULL,
   settings_file = NULL,
-  organism_db = NULL
+  organism_db = NULL,
+  assume_inference = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,11 @@ if there is only one settings file associated with the jobs.}
 \item{organism_db}{character; FASTA file name. This is the same as the
 \code{Organism DB} column. No need to specify this if there is only one
 FASTA file associated with the jobs.}
+
+\item{assume_inference}{logical; If \code{TRUE} then takes the \code{Protein} column
+as protein ids that passed the inference step. Otherwise, the function
+will take both \code{Protein} and \verb{Mapped Proteins} and report all of them on
+separate rows for the matching peptides.}
 }
 \value{
 (MSnID) MSnID object
