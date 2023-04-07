@@ -8,6 +8,10 @@
 #' @param organism_db character; FASTA file name. This is the same as the
 #'   \code{Organism DB} column. No need to specify this if there is only one
 #'   FASTA file associated with the jobs.
+#' @param assume_inference logical; If `TRUE` then takes the `Protein` column
+#'   as protein ids that passed the inference step. Otherwise, the function
+#'   will take both `Protein` and `Mapped Proteins` and report all of them on
+#'   separate rows for the matching peptides.
 #'   
 #' @return (MSnID) MSnID object
 #'
@@ -33,7 +37,8 @@
 read_msfragger_data_from_DMS <- function(data_package_num, 
                                          param_file = NULL, 
                                          settings_file = NULL, 
-                                         organism_db = NULL)
+                                         organism_db = NULL,
+                                         assume_inference = FALSE)
 {
   on.exit(unlink(tempdir()))
   
@@ -81,10 +86,26 @@ Please refine the arguments to make sure they uniquely define the MSFragger job.
     map(dplyr::select, -any_of("Spectrum File")) %>% 
     setNames(short_dataset_names) %>% 
     enframe(name = "Spectrum File") %>% 
-    unnest(value) %>% 
-    data.table()
+    unnest(value)
   
+  if(!assume_inference){
+    # prot_mapping <- dt %>%
+    #   distinct(Protein, `Mapped Proteins`) %>%
+    #   unite(Protein, `Mapped Proteins`, col = "all_prot", na.rm = T, sep = ", ", remove = FALSE) %>% 
+    #   separate_rows(all_prot, sep = ", ") %>%
+    #   select(Protein, all_prot)
+    # 
+    # dt <- inner_join(dt, prot_mapping) %>%
+    #   select(-Protein) %>%
+    #   rename(Protein = all_prot)
+    
+    dt <- dt %>% 
+      unite(Protein, `Mapped Proteins`, col = "Protein", na.rm = T, sep = ", ") %>% 
+      separate_rows(Protein, sep = ", ")
+  }
   
+  dt <- as.data.table(dt)
+
   new_names <- c("spectrumFile" = "Spectrum File",
                  "accession" = "Protein",
                  "chargeState" = "Charge",
