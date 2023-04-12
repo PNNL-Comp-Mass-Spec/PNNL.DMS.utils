@@ -18,7 +18,7 @@
 #' @md
 #'
 #' @importFrom MSnID MSnID psms
-#' @importFrom data.table data.table rbindlist setnames :=
+#' @importFrom data.table data.table as.data.table rbindlist setnames :=
 #' @importFrom plyr llply
 #' @importFrom readr read_tsv
 #' @importFrom purrr map
@@ -47,7 +47,7 @@ read_msfragger_data_from_DMS <- function(data_package_num,
     filter(Tool == "MSFragger")
   if(!is.null(param_file))
     job_records <- filter(job_records, Parameter_File == param_file)
-  if(!is.null(param_file))
+  if(!is.null(settings_file))
     job_records <- filter(job_records, Settings_File == settings_file)
   if(!is.null(organism_db))
     job_records <- filter(job_records, Organism_DB == organism_db)
