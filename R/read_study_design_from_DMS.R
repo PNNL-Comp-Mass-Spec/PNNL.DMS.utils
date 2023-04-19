@@ -66,13 +66,13 @@ path_to_study_design_from_DMS <- function(data_package_num,
     }
     dir.create(local_folder)
     
-    remote_folder <- gsub("\\\\","/", dataPkgReport$`Share Path`)
+    remote_folder <- gsub("\\\\","/", dataPkgReport$share_path)
     remote_folder <- gsub("(", "\\(", remote_folder, fixed = T)
     remote_folder <- gsub(")", "\\)", remote_folder, fixed = T)
     mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
     system(mount_cmd)
   }else if(.Platform$OS.type == "windows"){
-    local_folder <- dataPkgReport$`Share Path`
+    local_folder <- dataPkgReport$share_path
   }else{
     stop("Unknown OS type.")
   }
@@ -116,7 +116,7 @@ read_study_design_from_DMS <- function(data_package_num,
   if(.Platform$OS.type == "unix" | useHTTP){
     local_folder <- "~/temp_study_des"
     
-    remote_folder <- gsub("\\\\","/", dataPkgReport$`Share Path`)
+    remote_folder <- gsub("\\\\","/", dataPkgReport$share_path)
     remote_folder <- gsub("(", "\\(", remote_folder, fixed = TRUE)
     remote_folder <- gsub(")", "\\)", remote_folder, fixed = TRUE)
     
@@ -126,7 +126,7 @@ read_study_design_from_DMS <- function(data_package_num,
     })
     
   } else if (.Platform$OS.type == "windows") {
-    local_folder <- dataPkgReport$`Share Path`
+    local_folder <- dataPkgReport$share_path
     
     # Get paths to each of the study design tables
     file_paths <- lapply(study_design_files, function(file_i) {
