@@ -16,6 +16,8 @@
 #' * `get_results_for_multiple_jobs.dt()`: returns results as concatenated data.table given job numbers
 #' * `get_results_for_single_job()`: returns results given job number
 #' * `get_results_for_single_job.dt()`: returns results as data.table given job number
+#' * `get_datasets_by_data_package()`: returns table with datasets info
+#' * `download_datasets_by_data_package()`: downloads datasets into provided location
 #' @md
 #'
 #'

@@ -11,6 +11,8 @@
 \alias{get_output_folder_for_job_and_tool}
 \alias{get_AScore_results}
 \alias{get_job_records_by_dataset_package}
+\alias{get_datasets_by_data_package}
+\alias{download_datasets_by_data_package}
 \alias{get_results_for_multiple_jobs}
 \alias{get_results_for_multiple_jobs.dt}
 \alias{get_results_for_single_job}
@@ -51,6 +53,14 @@ get_output_folder_for_job_and_tool(jobNumber, toolName, mostRecent = TRUE)
 get_AScore_results(data_package_num)
 
 get_job_records_by_dataset_package(data_package_num)
+
+get_datasets_by_data_package(data_package_num)
+
+download_datasets_by_data_package(
+  data_package_num,
+  copy_to = ".",
+  fileNamePttrn = ".raw"
+)
 
 get_results_for_multiple_jobs(jobRecords)
 
@@ -132,6 +142,8 @@ to be installed. Mac/Linux functionality is not well tested.
 \item \code{get_results_for_multiple_jobs.dt()}: returns results as concatenated data.table given job numbers
 \item \code{get_results_for_single_job()}: returns results given job number
 \item \code{get_results_for_single_job.dt()}: returns results as data.table given job number
+\item \code{get_datasets_by_data_package()}: returns table with datasets info
+\item \code{download_datasets_by_data_package()}: downloads datasets into provided location
 }
 
 This function read AScore results from a local folder.
