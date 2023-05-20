@@ -430,6 +430,66 @@ get_job_records_by_dataset_package <- function(data_package_num)
 
 #' @export
 #' @rdname pnnl_dms_utils
+get_datasets_by_data_package <- function(data_package_num)
+{
+  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
+                     get_driver(),
+                     get_auth())
+  con <- dbConnect(odbc(), .connection_string=con_str)
+  strSQL <- sprintf("
+                     SELECT *
+                     FROM V_Mage_Data_Package_Datasets
+                     WHERE Data_Package_ID = %s",
+                    data_package_num)
+  qry <- dbSendQuery(con, strSQL)
+  jr <- dbFetch(qry)
+  dbClearResult(qry)
+  dbDisconnect(con)
+  return(jr)
+}
+
+
+#' @export
+#' @rdname pnnl_dms_utils
+download_datasets_by_data_package <- function(data_package_num, 
+                                              copy_to = ".", 
+                                              fileNamePttrn = ".raw")
+{
+   dataset_tbl <- get_datasets_by_data_package(data_package_num)
+   
+   for(pathToFile in dataset_tbl$Folder){
+      if (.Platform$OS.type == "unix") {
+         pathToFile <- get_url_from_dir_and_file(pathToFile, fileNamePttrn)
+      } else if (.Platform$OS.type == "windows") {
+         local_folder <- pathToFile
+         pathToFile <- list.files(path=local_folder,
+                                  pattern=fileNamePttrn,
+                                  full.names=TRUE)
+      } else {
+         stop("Unknown OS type.")
+      }
+  
+      file.copy(pathToFile, copy_to)
+   }
+
+   return(NULL)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' @export
+#' @rdname pnnl_dms_utils
 get_results_for_multiple_jobs <- function(jobRecords){
   if(grepl("Darwin", Sys.info()["sysname"], ignore.case = T)){
     stop("The function `get_results_for_multiple_jobs` will likely crash your Mac!
