@@ -51,11 +51,12 @@
 #' @importFrom tibble enframe
 #' @importFrom readr read_tsv
 #' @importFrom data.table data.table rbindlist
-#' @importFrom utils read.delim tail download.file
+#' @importFrom utils read.delim tail download.file txtProgressBar setTxtProgressBar 
 #' @importFrom stringr str_match_all str_match str_replace_all str_replace
 #' @importFrom curl curl_download
 #' @importFrom RCurl url.exists
 #' @importFrom purrr map
+#' @importFrom lubridate seconds_to_period
 #'
 #' @name pnnl_dms_utils
 #'
@@ -458,8 +459,13 @@ download_datasets_by_data_package <- function(data_package_num,
                                               fileNamePttrn = ".raw")
 {
    dataset_tbl <- get_datasets_by_data_package(data_package_num)
-   
+   pb <- txtProgressBar(max = nrow(dataset_tbl),
+                        style = 3)
+   init <- numeric(nrow(dataset_tbl))
+   end <- numeric(nrow(dataset_tbl))
+   i <- 1
    for(pathToFile in dataset_tbl$Folder){
+      init[i] <- Sys.time()
       if (.Platform$OS.type == "unix") {
          pathToFile <- get_url_from_dir_and_file(pathToFile, fileNamePttrn)
       } else if (.Platform$OS.type == "windows") {
@@ -470,24 +476,23 @@ download_datasets_by_data_package <- function(data_package_num,
       } else {
          stop("Unknown OS type.")
       }
-  
+      
       file.copy(pathToFile, copy_to)
+      
+      end[i] <- Sys.time()
+      setTxtProgressBar(pb, i)
+      time <- round(seconds_to_period(sum(end - init)), 0)
+      est <- nrow(dataset_tbl) * (mean(end[end != 0] - init[init != 0])) - time
+      remainining <- round(seconds_to_period(est), 0)
+      cat(paste("\n  Execution time:", time,
+                " // Estimated time remaining:", remainining), "")
+      i <- i + 1
+      
    }
-
-   return(NULL)
+   close(pb)
+   
+   invisible(NULL)
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #' @export
