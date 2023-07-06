@@ -1,5 +1,9 @@
 # PNNL.DMS.utils
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/PNNL-Comp-Mass-Spec/PNNL.DMS.utils/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/PNNL-Comp-Mass-Spec/PNNL.DMS.utils/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 A collection of tools for accessing PNNL's Data Management System (DMS).
 
 ## R Installation and Usage
