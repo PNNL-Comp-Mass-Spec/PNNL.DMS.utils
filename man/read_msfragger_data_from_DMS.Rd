@@ -15,19 +15,19 @@ read_msfragger_data_from_DMS(
 \arguments{
 \item{data_package_num}{numeric or character; the Data Package ID in the DMS.}
 
-\item{param_file}{character; MSFragger parameter file. No need to specify this
-if there is only one parameter file associated with the jobs.}
+\item{param_file}{character; MSFragger parameter file. No need to specify
+this if there is only one parameter file associated with the jobs.}
 
-\item{settings_file}{character; MSFragger settings file. No need to specify this
-if there is only one settings file associated with the jobs.}
+\item{settings_file}{character; MSFragger settings file. No need to specify
+this if there is only one settings file associated with the jobs.}
 
 \item{organism_db}{character; FASTA file name. This is the same as the
 \code{Organism DB} column. No need to specify this if there is only one
 FASTA file associated with the jobs.}
 
-\item{assume_inference}{logical; If \code{TRUE} then takes the \code{Protein} column
-as protein ids that passed the inference step. Otherwise, the function
-will take both \code{Protein} and \verb{Mapped Proteins} and report all of them on
+\item{assume_inference}{logical; If \code{TRUE} then takes the \code{Protein} column as
+protein ids that passed the inference step. Otherwise, the function will
+take both \code{Protein} and \verb{Mapped Proteins} and report all of them on
 separate rows for the matching peptides.}
 }
 \value{
@@ -37,7 +37,9 @@ separate rows for the matching peptides.}
 Reading MSFragger output from PNNL's DMS
 }
 \examples{
-msnid <- read_msfragger_data_from_DMS(4139)
-show(msnid)
+if (is_PNNL_DMS_connection_successful()) {
+  msnid <- read_msfragger_data_from_DMS(4139)
+  show(msnid)
+}
 
 }
