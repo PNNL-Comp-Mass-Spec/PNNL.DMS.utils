@@ -5,10 +5,10 @@
 #'     multiple datasets.
 #' * `make_id_to_quant_scan_link_table_for_dataset()`: Link ID scans to quant
 #'     scans for a single dataset.
-#' @param scanStats placeholder
-#' @param idScanPattern placeholder
-#' @param quantScanPattern placeholder
-#' @param threshold placeholder
+#' @param scanStats 
+#' @param idScanPattern 
+#' @param quantScanPattern 
+#' @param threshold 
 #'
 #' @return (data.table) with reporter ion intensities and other metrics
 #' 
