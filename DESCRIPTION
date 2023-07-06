@@ -10,16 +10,21 @@ License: Artistic-2.0
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Imports:
-   MSnID,
+   Biobase,
+   curl,
    data.table,
    dplyr,
-   purrr,
+   lubridate,
+   MSnbase,
+   MSnID,
    odbc,
    plyr,
+   RCurl,
    readr,
+   stats,
    stringr,
-   utils,
-   curl,
-   RCurl
+   tibble,
+   tidyr,
+   utils
 Remotes:
    github::PNNL-Comp-Mass-Spec/MSnID@pnnl-master
