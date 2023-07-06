@@ -25,7 +25,7 @@
 #'
 #' @examples
 #' if (is_PNNL_DMS_connection_successful()) {
-#'   msnset <- read_MSstats_from_MSFragger_job(4139)
+#'   msnset <- read_MSstats_from_MSFragger_job(4938)
 #'   show(msnset)
 #' }
 #'
