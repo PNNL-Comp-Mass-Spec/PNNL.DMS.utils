@@ -38,10 +38,12 @@ require additional modification by the user to prepare it for downstream
 processing steps.
 }
 \examples{
-msnid <- read_msgf_data_from_DMS(3606)
-show(msnid)
+if (is_PNNL_DMS_connection_successful()) {
+  msnid <- read_msgf_data_from_DMS(3606)
+  show(msnid)
 
-#
-msnid <- read_msgf_data_from_DMS(3606, use_mzIdentML = TRUE)
-show(msnid)
+  msnid <- read_msgf_data_from_DMS(3606, use_mzIdentML = TRUE)
+  show(msnid)
+}
+
 }
