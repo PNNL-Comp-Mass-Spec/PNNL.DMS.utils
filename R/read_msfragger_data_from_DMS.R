@@ -83,11 +83,14 @@ read_msfragger_data_from_DMS <- function(data_package_num,
    fileNamePttrn <- "_psm\\.tsv"
    path_to_files <- list.files(path, pattern = fileNamePttrn, full.names = TRUE)
    cn <- colnames(read_tsv(path_to_files[1], n_max = 1))
-   last_col <- which(cn == "Quan Usage") - 1
+   # last_col <- which(cn == "Quan Usage") - 1
+   keep_cols <- c("Spectrum", "Spectrum File", "Protein", "Mapped Proteins",
+                  "Charge", "Calculated M/Z", "Calibrated Observed M/Z",
+                  "Peptide", "Prev AA", "Next AA")
    
    dt <- lapply(path_to_files, function(path_i) {
       read_tsv(file = path_i, col_types = readr::cols(),
-               col_select = all_of(1:last_col), guess_max = Inf,
+               col_select = any_of(keep_cols), guess_max = Inf,
                progress = FALSE) %>% 
          tidyr::fill(`Spectrum File`)
    }) %>% 
