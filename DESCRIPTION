@@ -28,3 +28,6 @@ Imports:
    utils
 Remotes:
    github::PNNL-Comp-Mass-Spec/MSnID@pnnl-master
+URL: 
+   https://github.com/PNNL-Comp-Mass-Spec/PNNL.DMS.utils/
+   https://pnnl-comp-mass-spec.github.io/PNNL.DMS.utils/
