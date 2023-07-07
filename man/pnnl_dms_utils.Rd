@@ -140,6 +140,8 @@ functionality is not well tested.
 }
 }
 \examples{
-get_output_folder_for_job_and_tool(863951, "DTA_Refinery")
+if (is_PNNL_DMS_connection_successful()) {
+  get_output_folder_for_job_and_tool(863951, "DTA_Refinery")
+}
 }
 \keyword{datasets}

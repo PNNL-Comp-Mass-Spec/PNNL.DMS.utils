@@ -64,7 +64,9 @@
 #' @name pnnl_dms_utils
 #'
 #' @examples
-#' get_output_folder_for_job_and_tool(863951, "DTA_Refinery")
+#' if (is_PNNL_DMS_connection_successful()) {
+#'   get_output_folder_for_job_and_tool(863951, "DTA_Refinery")
+#' }
 
 # dictionary that defines the suffix of the files given the analysis tool
 tool2suffix <- list("MSGFPlus"               = "_msgfplus_syn.txt",
