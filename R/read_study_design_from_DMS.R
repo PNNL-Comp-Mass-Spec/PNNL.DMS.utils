@@ -1,17 +1,17 @@
 #' @title Reading and Writing Study Design Tables
 #'
 #' @description Fetches study design results from DMS. Checks that study design
-#' files are internally consistent. DMS functionality not useful outside of PNNL
-#' unless connected through VPN.
+#'   files are internally consistent. DMS functionality not useful outside of
+#'   PNNL unless connected through VPN.
 #'
-#' @description 
-#' 
+#' @description
+#'
 #' * `path_to_study_design_from_DMS()`: gets location of study design files from
 #' the DMS.
-#' 
+#'
 #' * `read_study_design_from_DMS()`: reads study design tables from the DMS data
 #' package folder.
-#' 
+#'
 #' * `write_study_design_to_DMS()`: writes study design tables to the DMS so
 #' that they can be accessed by others.
 #'
@@ -26,19 +26,21 @@
 #'   dbDisconnect
 #' @importFrom readr read_tsv cols
 #' @importFrom utils write.table
-#' 
+#'
 #' @name read_study_design
-#' 
+#'
 #' @md
 #'
 #' @examples
-#' study_design <- read_study_design_from_DMS(3606)
+#' if (is_PNNL_DMS_connection_successful()) {
+#'   study_design <- read_study_design_from_DMS(3606)
 #'
-#' fractions  <- study_design$fractions
-#' samples    <- study_design$samples
-#' references <- study_design$references
+#'   fractions  <- study_design$fractions
+#'   samples    <- study_design$samples
+#'   references <- study_design$references
+#' }
 
-
+ 
 #' @export
 #' @rdname read_study_design
 path_to_study_design_from_DMS <- function(data_package_num,

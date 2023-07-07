@@ -11,14 +11,14 @@ read_masic_data_from_DMS(
 )
 }
 \arguments{
-\item{data_package_num}{(numeric or character vector) containing Data Package 
+\item{data_package_num}{(numeric or character vector) containing Data Package
 ID(s) located in DMS.}
 
-\item{interference_score}{(logical) read interference score. Default is 
+\item{interference_score}{(logical) read interference score. Default is
 \code{FALSE}.}
 
-\item{id_quant_table}{If the MS/MS identification scans and reporter ion 
-intensity scans are different for a particular dataset, set this to 
+\item{id_quant_table}{If the MS/MS identification scans and reporter ion
+intensity scans are different for a particular dataset, set this to
 \code{TRUE}. Default is \code{FALSE}.}
 }
 \value{

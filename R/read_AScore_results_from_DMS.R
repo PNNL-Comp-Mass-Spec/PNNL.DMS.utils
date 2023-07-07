@@ -2,26 +2,27 @@
 #'
 #' This function read AScore results from a local folder.
 #'
-#' @param data_package_num (Numeric or Character vector) containing Data Package ID(s) located in DMS
+#' @param data_package_num (Numeric or Character vector) containing Data Package
+#'   ID(s) located in DMS
 #' @return ascore (data.frame) AScore results
 #'
 #' @importFrom dplyr rename inner_join filter
 #' @importFrom readr read_tsv
-#' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
+#' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult
+#'   dbDisconnect
 #' @export read_AScore_results_from_DMS
 #'
-#'
 #' @examples
-#' data_package_num <- 3625
-#' # msnid <- read_msgf_data_from_DMS(data_package_num) # Not run
-#' ascore <- read_AScore_results_from_DMS(data_package_num)
-#' # Use PlexedPiper to make use of the Ascore results
-#' # msnid <- PlexedPiper::best_PTM_location_by_ascore(msnid, ascore)
-
-
-
+#' if (is_PNNL_DMS_connection_successful()) {
+#'   data_package_num <- 3625
+#'   # msnid <- read_msgf_data_from_DMS(data_package_num) # Not run
+#'   ascore <- read_AScore_results_from_DMS(data_package_num)
+#'   # Use PlexedPiper to make use of the Ascore results
+#'   # msnid <- PlexedPiper::best_PTM_location_by_ascore(msnid, ascore)
+#' }
+#' 
 #' @export
-#' @rdname pnnl_dms_utils
+
 # Get AScore results for a given data package (e.g. 3432)
 read_AScore_results_from_DMS <- function(data_package_num){
   # Prevent "no visible binding for global variable" note
@@ -42,7 +43,8 @@ read_AScore_results_from_DMS <- function(data_package_num){
   
   if(nrow(job) > 1){
     job <- tail(job, 1)
-    warning(paste0("Multiple Ascore jobs detected. Selecting the last one: ", job[["Job"]]))
+    warning(paste0("Multiple Ascore jobs detected. Selecting the last one: ",
+                   job[["Job"]]))
   }
   
   # in case Mac OS
@@ -83,5 +85,4 @@ read_AScore_results_from_DMS <- function(data_package_num){
 
 # Prevent "no visible binding for global variable" note.
 utils::globalVariables(c("Tool"))
-
 

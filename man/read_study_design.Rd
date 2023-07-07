@@ -26,8 +26,8 @@ tables when writing files.}
 }
 \description{
 Fetches study design results from DMS. Checks that study design
-files are internally consistent. DMS functionality not useful outside of PNNL
-unless connected through VPN.
+files are internally consistent. DMS functionality not useful outside of
+PNNL unless connected through VPN.
 
 \itemize{
 \item \code{path_to_study_design_from_DMS()}: gets location of study design files from
@@ -39,9 +39,11 @@ that they can be accessed by others.
 }
 }
 \examples{
-study_design <- read_study_design_from_DMS(3606)
+if (is_PNNL_DMS_connection_successful()) {
+  study_design <- read_study_design_from_DMS(3606)
 
-fractions  <- study_design$fractions
-samples    <- study_design$samples
-references <- study_design$references
+  fractions  <- study_design$fractions
+  samples    <- study_design$samples
+  references <- study_design$references
+}
 }

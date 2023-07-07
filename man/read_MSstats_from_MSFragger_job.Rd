@@ -14,26 +14,33 @@ read_MSstats_from_MSFragger_job(
 \arguments{
 \item{data_package_num}{numeric or character; the Data Package ID in the DMS.}
 
-\item{param_file}{character; MSFragger parameter file. No need to specify this
-if there is only one parameter file associated with the jobs.}
+\item{param_file}{character; MSFragger parameter file. No need to specify
+this if there is only one parameter file associated with the jobs.}
 
-\item{settings_file}{character; MSFragger settings file. No need to specify this
-if there is only one settings file associated with the jobs.}
+\item{settings_file}{character; MSFragger settings file. No need to specify
+this if there is only one settings file associated with the jobs.}
 
 \item{organism_db}{character; FASTA file name. This is the same as the
 \code{Organism DB} column. No need to specify this if there is only one
 FASTA file associated with the jobs.}
 }
 \value{
-(MSnSet) MSnSet object
+(MSnSet) MSnSet object of log2-transformed intensities. Rows have
+  been median-centered across samples.
 }
 \description{
-Function has only been tested with label-free intensity-based quantification
-data. It has not been tested with TMT data. MSstats.csv is an optional output
-file which needs to be specified in DMS settings file.
+Function has only been tested with label-free intensity-based
+  quantification data. It has not been tested with TMT data. MSstats.csv is
+  an optional output file which needs to be specified in DMS settings file.
 }
 \examples{
-msnset <- read_MSstats_from_MSFragger_job(4139)
-show(msnset)
+if (is_PNNL_DMS_connection_successful()) {
+  msnset <- read_MSstats_from_MSFragger_job(
+    data_package_num = 4938,
+    param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_StatCysAlk_20ppmParTol.params",
+    settings_file = "MSFragger_MatchBetweenRuns_Java80GB.xml",
+    organism_db = "ID_008026_7A1842EC.fasta")
+  show(msnset)
+}
 
 }

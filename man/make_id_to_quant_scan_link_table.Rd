@@ -20,13 +20,13 @@ make_id_to_quant_scan_link_table_for_dataset(
 )
 }
 \arguments{
-\item{scanStats}{placeholder}
+\item{scanStats}{}
 
-\item{idScanPattern}{placeholder}
+\item{idScanPattern}{}
 
-\item{quantScanPattern}{placeholder}
+\item{quantScanPattern}{}
 
-\item{threshold}{placeholder}
+\item{threshold}{}
 }
 \value{
 (data.table) with reporter ion intensities and other metrics

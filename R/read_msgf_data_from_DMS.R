@@ -23,14 +23,17 @@
 #' @importFrom data.table data.table rbindlist
 #'
 #' @examples
-#' msnid <- read_msgf_data_from_DMS(3606)
-#' show(msnid)
+#' if (is_PNNL_DMS_connection_successful()) {
+#'   msnid <- read_msgf_data_from_DMS(3606)
+#'   show(msnid)
 #'
-#' #
-#' msnid <- read_msgf_data_from_DMS(3606, use_mzIdentML = TRUE)
-#' show(msnid)
-
+#'   # msnid <- read_msgf_data_from_DMS(3606, use_mzIdentML = TRUE)
+#'   # show(msnid)
+#' }
+#'
 #' @export
+
+
 read_msgf_data_from_DMS <- function(data_package_num, 
                                     param_file = NULL,
                                     organism_db = NULL,
