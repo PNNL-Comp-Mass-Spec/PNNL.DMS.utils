@@ -1,7 +1,7 @@
 Package: PNNL.DMS.utils
 Type: Package
 Title: Tools for accessing PNNL's Data Management System
-Version: 0.1.9
+Version: 0.2.0
 Author: Vladislav Petyuk, Michael Nestor, Jamie Moon
 Maintainer: Vladislav Petyuk <vladislav.petyuk@pnnl.gov>
 Description: More about what it does (maybe more than one line)
