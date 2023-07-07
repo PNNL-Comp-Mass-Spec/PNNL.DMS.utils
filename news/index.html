@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">PNNL.DMS.utils</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -42,10 +42,21 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="0.1.9" id="pnnldmsutils-019">PNNL.DMS.utils 0.1.9<a class="anchor" aria-label="anchor" href="#pnnldmsutils-019"></a></h2>
+<h2 class="page-header" data-toc-text="0.2.0" id="pnnldmsutils-v020">PNNL.DMS.utils v0.2.0<a class="anchor" aria-label="anchor" href="#pnnldmsutils-v020"></a></h2>
 <div class="section level3">
-<h3 id="version-0-1-9">Version 0.1.9<a class="anchor" aria-label="anchor" href="#version-0-1-9"></a></h3>
-<ul><li>initial version with MSFragger output reading capability</li>
+<h3 id="v020-0-2-0">v0.2.0<a class="anchor" aria-label="anchor" href="#v020-0-2-0"></a></h3>
+<ul><li>Update <code>read_msfragger_from_DMS</code>
+</li>
+<li>Add <code>read_MSstats_from_MSFragger_job</code> to create an MSnSet from an MSFragger-generated MSstats.csv file.</li>
+<li>Fix errors caught by <code>devtools::check()</code>
+</li>
+<li>Modify examples to only run if connection to PNNL’s DMS is successful</li>
+<li>Minor documentation updates</li>
+<li>Implement <code>R-CMD-check</code> and <code>pkgdown</code> GitHub actions. The former only currently runs on a Windows machine, due to needing ODBC drivers for Mac and Unix. <code>pkgdown</code> runs when new releases are generated, though it can also be initiated manually.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="v019-0-2-0">v0.1.9<a class="anchor" aria-label="anchor" href="#v019-0-2-0"></a></h3>
+<ul><li>Initial version with MSFragger output reading capability</li>
 </ul></div>
 </div>
   </div>
