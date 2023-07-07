@@ -13,19 +13,24 @@
 #'   \code{Organism DB} column. No need to specify this if there is only one
 #'   FASTA file associated with the jobs.
 #'
-#' @return (MSnSet) MSnSet object
+#' @return (MSnSet) MSnSet object of log2-transformed intensities. Rows have
+#'   been median-centered across samples.
 #'
 #' @importFrom MSnbase MSnSet
 #' @importFrom Biobase exprs `exprs<-`
 #' @importFrom data.table fread
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble column_to_rownames
-#' @importFrom dplyr %>% select filter distinct
+#' @importFrom dplyr %>% select filter distinct relocate everything
 #' @importFrom stats median
 #'
 #' @examples
 #' if (is_PNNL_DMS_connection_successful()) {
-#'   msnset <- read_MSstats_from_MSFragger_job(4938)
+#'   msnset <- read_MSstats_from_MSFragger_job(
+#'     data_package_num = 4938,
+#'     param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_StatCysAlk_20ppmParTol.params",
+#'     settings_file = "MSFragger_MatchBetweenRuns_Java80GB.xml",
+#'     organism_db = "ID_008026_7A1842EC.fasta")
 #'   show(msnset)
 #' }
 #'
@@ -74,27 +79,29 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    }
    
    df <- fread(path_to_file, showProgress = TRUE, data.table = FALSE) %>%
+      filter(!is.na(Intensity)) %>% 
       # May add charge col later
-      select(ProteinName, PeptideSequence, Run, Intensity)
+      select(ProteinName, PeptideSequence, Run, Intensity) %>%
+      mutate(featureName = paste0(ProteinName, "@", PeptideSequence)) %>% 
+      relocate(featureName, .before = everything())
    
    # Will sum intensity of unique features.
    x_data <- df %>%
-      filter(!is.na(Intensity)) %>%
-      pivot_wider(id_cols = "PeptideSequence", 
+      pivot_wider(id_cols = "featureName", 
                   names_from = "Run", 
-                  values_from = "Intensity", 
+                  values_from = "Intensity",
                   values_fn = sum) %>% 
       as.data.frame() %>%
-      column_to_rownames(var = "PeptideSequence") %>% 
+      column_to_rownames(var = "featureName") %>% 
       as.matrix()
    
    f_data <- df %>%
-      distinct(ProteinName, PeptideSequence) %>%
-      `rownames<-`(., .$PeptideSequence)
+      distinct(featureName, ProteinName, PeptideSequence) %>%
+      `rownames<-`(.[["featureName"]])
    
    p_data <- df %>%
-      select(Run) %>%
-      `rownames<-`(., .$Run)
+      distinct(Run) %>%
+      `rownames<-`(.[["Run"]])
    
    x_data <- x_data[rownames(f_data), rownames(p_data)]
    
@@ -123,6 +130,6 @@ log2_zero_center <- function(m) {
 
 utils::globalVariables(
    c("Parameter_File", "Settings_File", "Organism_DB", "ProteinName",
-     "PeptideSequence", "Run", "Intensity", ".")
+     "PeptideSequence", "Run", "Intensity", ".", "featureName")
 )
 

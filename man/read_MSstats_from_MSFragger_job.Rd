@@ -25,7 +25,8 @@ this if there is only one settings file associated with the jobs.}
 FASTA file associated with the jobs.}
 }
 \value{
-(MSnSet) MSnSet object
+(MSnSet) MSnSet object of log2-transformed intensities. Rows have
+  been median-centered across samples.
 }
 \description{
 Function has only been tested with label-free intensity-based
@@ -34,7 +35,11 @@ Function has only been tested with label-free intensity-based
 }
 \examples{
 if (is_PNNL_DMS_connection_successful()) {
-  msnset <- read_MSstats_from_MSFragger_job(4139)
+  msnset <- read_MSstats_from_MSFragger_job(
+    data_package_num = 4938,
+    param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_StatCysAlk_20ppmParTol.params",
+    settings_file = "MSFragger_MatchBetweenRuns_Java80GB.xml",
+    organism_db = "ID_008026_7A1842EC.fasta")
   show(msnset)
 }
 
