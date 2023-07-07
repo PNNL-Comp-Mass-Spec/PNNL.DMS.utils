@@ -27,8 +27,8 @@
 #'   msnid <- read_msgf_data_from_DMS(3606)
 #'   show(msnid)
 #'
-#'   msnid <- read_msgf_data_from_DMS(3606, use_mzIdentML = TRUE)
-#'   show(msnid)
+#'   # msnid <- read_msgf_data_from_DMS(3606, use_mzIdentML = TRUE)
+#'   # show(msnid)
 #' }
 #'
 #' @export
