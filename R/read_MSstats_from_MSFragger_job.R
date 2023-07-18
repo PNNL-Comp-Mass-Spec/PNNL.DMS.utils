@@ -17,7 +17,6 @@
 #'   been median-centered across samples.
 #'
 #' @importFrom MSnbase MSnSet
-#' @importFrom Biobase exprs `exprs<-`
 #' @importFrom data.table fread
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble column_to_rownames
@@ -106,26 +105,11 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    x_data <- x_data[rownames(f_data), rownames(p_data)]
    
    m <- MSnSet(exprs = x_data, fData = f_data, pData = p_data)
-   m <- log2_zero_center(m)
    
    return(m)
 }
 
 
-# Same as MSnSet.utils::log2_zero_center
-log2_zero_center <- function(m) {
-   exprs(m) <- log2(exprs(m))
-   
-   if (any(is.infinite(exprs(m))) == TRUE) {
-      stop("After transformation, infinite values are present.")
-   }
-   
-   exprs(m) <- sweep(exprs(m), MARGIN = 1, 
-                     STATS = apply(exprs(m), 1, FUN = median, na.rm = TRUE), 
-                     FUN = "-")
-   
-   return(m)
-}
 
 
 utils::globalVariables(
