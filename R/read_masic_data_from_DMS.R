@@ -2,11 +2,15 @@
 #'
 #' @param data_package_num (numeric or character vector) containing Data Package
 #'   ID(s) located in DMS.
+#'   
 #' @param interference_score (logical) read interference score. Default is
 #'   \code{FALSE}.
-#' @param id_quant_table If the MS/MS identification scans and reporter ion
-#'   intensity scans are different for a particular dataset, set this to
-#'   \code{TRUE}. Default is \code{FALSE}.
+#'   
+#' @param idscanpattern Ion fragmentation method used to produce the scan used for 
+#'    peptide identification
+#'    
+#' @param quantScanPattern Ion fragmentation method used to produce the scan used for 
+#'    peptide quantification
 #'
 #' @return (data.frame) with reporter ion intensities and other metrics
 #'
@@ -14,11 +18,15 @@
 #' @importFrom data.table rbindlist
 #'
 #' @export read_masic_data_from_DMS
+#' 
+#' @example 
+#' test <- read_masic_data_from_DMS(4970)
 
 
 read_masic_data_from_DMS <- function(data_package_num, 
                                      interference_score=FALSE, 
-                                     id_quant_table = FALSE)
+                                     idScanPattern = "ms2", 
+                                     quantScanPattern = "ms2")
 {
   # Prevent "no visible binding for global variable" note
   Dataset <- Scan <- QuantScan <- IDScan <- 
@@ -44,8 +52,10 @@ read_masic_data_from_DMS <- function(data_package_num,
            starts_with("Ion"), 
            -contains("Resolution"))
   
-  if (id_quant_table) {
-    quantIDTable <- make_id_to_quant_scan_link_table(masicList[["_ScanStatsEx.txt"]]) %>%
+  if (idScanPattern != quantScanPattern) {
+    quantIDTable <- make_id_to_quant_scan_link_table(masicList[["_ScanStatsEx.txt"]],
+                                                     idScanPattern = idScanPattern,
+                                                     quantScanPattern = quantScanPattern) %>%
       dplyr::rename(any_of(c("ScanNumber" = "QuantScan")))
     masicData <- inner_join(quantIDTable, masicData, 
                             by = c("Dataset", "ScanNumber")) %>%    
