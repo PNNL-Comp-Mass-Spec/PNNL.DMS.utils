@@ -7,7 +7,8 @@
 read_masic_data_from_DMS(
   data_package_num,
   interference_score = FALSE,
-  id_quant_table = FALSE
+  idScanPattern = "ms2",
+  quantScanPattern = "ms2"
 )
 }
 \arguments{
@@ -17,13 +18,20 @@ ID(s) located in DMS.}
 \item{interference_score}{(logical) read interference score. Default is
 \code{FALSE}.}
 
-\item{id_quant_table}{If the MS/MS identification scans and reporter ion
-intensity scans are different for a particular dataset, set this to
-\code{TRUE}. Default is \code{FALSE}.}
+\item{quantScanPattern}{Ion fragmentation method used to produce the scan used for 
+peptide quantification}
+
+\item{idscanpattern}{Ion fragmentation method used to produce the scan used for 
+peptide identification}
 }
 \value{
 (data.frame) with reporter ion intensities and other metrics
 }
 \description{
 Reading MASIC results from PNNL's DMS
+}
+\examples{
+if (is_PNNL_DMS_connection_successful()) {
+test <- read_masic_data_from_DMS(4970)
+}
 }
