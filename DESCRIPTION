@@ -24,7 +24,8 @@ Imports:
    stringr,
    tibble,
    tidyr,
-   utils
+   utils,
+   RODBC
 Remotes:
    github::PNNL-Comp-Mass-Spec/MSnID@pnnl-master
 URL: 
