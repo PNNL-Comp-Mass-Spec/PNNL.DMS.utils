@@ -36,7 +36,9 @@ Driver = <driver_location>
 
   Note: If your location of `libtdsodbc.so` differs, use the proper location.
 
-4. In October 2023, it was discovered that there was a change to the `odbc` package in R that prevented the FreeTDS driver from being found. As a [workaround](https://stackoverflow.com/a/76765063), reinstall this package from source using the following commands:
+4. In October 2023, it was discovered that there was a change to the `odbc` package in R that prevented the FreeTDS driver from being found on Macs with Apple Silicon chips. To fix this, do ONE of the following:
+   - Add the line `export ODBCSYSINI=/opt/homebrew/etc` to the `~/.zshrc` file (or profile file for your default shell) OR;
+   - reinstall the `odbc` package from source using the following commands:
 ```R
 remove.packages("odbc")
 install.packages("odbc", type = "source")
