@@ -44,6 +44,8 @@ remove.packages("odbc")
 install.packages("odbc", type = "source")
 ```
 
+**For either fix, restart R before continuing.**
+
 ### Installation Tips
 
 If within PNNL network there may be an error associated with `mount_smbfs`. This happens due to network access credentials. Options are either to wait or proactively access one of the PNNL servers. For example try mounting one of the public directories from the terminal window. Enter your network password once requested. 
