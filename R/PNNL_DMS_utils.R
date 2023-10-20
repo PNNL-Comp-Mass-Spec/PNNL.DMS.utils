@@ -566,7 +566,7 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
       temp_filepath <- paste(tempfile(), ".fasta", sep = "")
       message("Pre-downloading FASTA file to local tempdir (and returning local path)")
       curl_download(url, destfile = temp_filepath, quiet = F)
-      path_to_FASTA <- url
+      path_to_FASTA <- temp_filepath
       
    } else if (.Platform$OS.type == "windows") {
       path_to_FASTA <- file.path(res['organism_db_storage_path'],
