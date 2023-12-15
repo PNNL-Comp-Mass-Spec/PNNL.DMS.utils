@@ -521,23 +521,25 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
    # make sure it was the same fasta used for all msgf jobs
    # at this point this works only with one data package at a time
    jobRecords <- get_job_records_by_dataset_package(data_package_num)
-   jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
+   # jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
    # if(length(unique(jobRecords$`Organism DB`)) != 1){
    #    stop("There should be exactly one FASTA file per data package!")
    # }
    
    # All FASTA files
-   fasta_files <- unique(jobRecords$`Organism DB`)
+   fasta_files <- setdiff(unique(jobRecords$`Organism DB`), "na")
+   if (length(fasta_files) == 0)
+      stop(paste0("There are no FASTA files in the package."))
+   
    # If organism_db is not provided, check that there are not multiple
    # FASTA files.
    if (is.null(organism_db)) {
-      if (length(fasta_files) != 1) {
+      if (length(fasta_files) > 1) {
          stop(paste0("There are multiple FASTA files. Please specify ",
                      "which one to return with organism_db:\n", 
                      paste(fasta_files, collapse = "\n")))
-      } else {
-         organism_db <- fasta_files
       }
+      organism_db <- fasta_files
    }
    # Filter to specific FASTA file
    jobRecords <- jobRecords[jobRecords$`Organism DB` == organism_db, ]
