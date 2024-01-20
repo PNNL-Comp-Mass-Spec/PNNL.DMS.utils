@@ -41,25 +41,26 @@
 #'   FASTA file associated with the jobs.
 #' @param dir 
 #' @param file_name_segment 
-#' @param copy_to 
+#' @param copy_to folder path to copy files into
 #' @param expected_multiple_files do we expect multiple files for a single job
 #'   or not. Default is FALSE.
+#' @param ncores number of cores to use in cluster
 #'
 #' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult
 #'   dbDisconnect
 #' @importFrom plyr ldply
-#' @importFrom dplyr %>% rename filter select any_of
+#' @importFrom dplyr %>% rename filter select any_of mutate
 #' @importFrom tidyr unnest
 #' @importFrom tibble enframe
 #' @importFrom readr read_tsv
 #' @importFrom data.table data.table rbindlist
-#' @importFrom utils read.delim tail download.file txtProgressBar
-#'   setTxtProgressBar
+#' @importFrom utils read.delim tail download.file
 #' @importFrom stringr str_match_all str_match str_replace_all str_replace
 #' @importFrom curl curl_download
 #' @importFrom RCurl url.exists
-#' @importFrom lubridate seconds_to_period
 #' @importFrom stats setNames
+#' @importFrom pbapply pbwalk
+#' @importFrom parallel makeCluster stopCluster
 #'
 #' @name pnnl_dms_utils
 #'
