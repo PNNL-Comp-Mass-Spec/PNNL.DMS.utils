@@ -316,42 +316,25 @@ get_datasets_by_data_package <- function(data_package_num)
 #' @rdname pnnl_dms_utils
 download_datasets_by_data_package <- function(data_package_num, 
                                               copy_to = ".", 
-                                              fileNamePttrn = ".raw")
+                                              fileNamePttrn = ".raw",
+                                              ncores = 2)
 {
-   dataset_tbl <- get_datasets_by_data_package(data_package_num)
-   pb <- txtProgressBar(max = nrow(dataset_tbl),
-                        style = 3)
-   init <- numeric(nrow(dataset_tbl))
-   end <- numeric(nrow(dataset_tbl))
-   i <- 1
-   for(pathToFile in dataset_tbl$Folder){
-      init[i] <- Sys.time()
-      if (.Platform$OS.type == "unix") {
-         pathToFile <- get_url_from_dir_and_file(pathToFile, fileNamePttrn)
-      } else if (.Platform$OS.type == "windows") {
-         local_folder <- pathToFile
-         pathToFile <- list.files(path=local_folder,
-                                  pattern=fileNamePttrn,
-                                  full.names=TRUE)
-      } else {
-         stop("Unknown OS type.")
-      }
-      
-      file.copy(pathToFile, copy_to)
-      
-      end[i] <- Sys.time()
-      setTxtProgressBar(pb, i)
-      time <- round(seconds_to_period(sum(end - init)), 0)
-      est <- nrow(dataset_tbl) * (mean(end[end != 0] - init[init != 0])) - time
-      remainining <- round(seconds_to_period(est), 0)
-      cat(paste("\n  Execution time:", time,
-                " // Estimated time remaining:", remainining), "")
-      i <- i + 1
-      
+   dataset_tbl <- get_datasets_by_data_package(data_package_num) %>% 
+      dplyr::select(Folder)
+   if (.Platform$OS.type == "unix") {
+      pathToFile <- dataset_tbl %>% 
+         dplyr::mutate(Folder = get_url_from_dir_and_file(Folder, fileNamePttrn))
+   } else if (.Platform$OS.type == "windows") {
+      pathToFile <- dataset_tbl %>% 
+         dplyr::mutate(Folder = list.files(path=Folder,
+                                           pattern=fileNamePttrn,
+                                           full.names=TRUE))
+   } else {
+      stop("Unknown OS type.")
    }
-   close(pb)
-   
-   invisible(NULL)
+   multiproc_cl <- makeCluster(ncores)
+   pbwalk(X = pathToFile$Folder, FUN = file.copy, cl = multiproc_cl, to = copy_to)
+   tryCatch(stopCluster(multiproc_cl))
 }
 
 
