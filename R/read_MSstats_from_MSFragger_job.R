@@ -13,14 +13,15 @@
 #'   \code{Organism DB} column. No need to specify this if there is only one
 #'   FASTA file associated with the jobs.
 #'
-#' @return (MSnSet) MSnSet object of FragPipe LFQ results
+#' @return (MSnSet) MSnSet object of log2-transformed intensities. Rows have
+#'   been median-centered across samples.
 #'
 #' @importFrom MSnbase MSnSet
-#' @importFrom MSnSet.utils read_FragPipe_LFQ
 #' @importFrom data.table fread
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble column_to_rownames
 #' @importFrom dplyr %>% select filter distinct relocate everything
+#' @importFrom stats median
 #'
 #' @examples
 #' if (is_PNNL_DMS_connection_successful()) {
@@ -76,7 +77,34 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
       stop(sprintf("MSstats.csv file not found in %s", path))
    }
    
-   m <- read_FragPipe_LFQ(path_to_file)
+   df <- fread(path_to_file, showProgress = TRUE, data.table = FALSE) %>%
+      filter(!is.na(Intensity)) %>% 
+      # May add charge col later
+      select(ProteinName, PeptideSequence, Run, Intensity) %>%
+      mutate(featureName = paste0(ProteinName, "@", PeptideSequence)) %>% 
+      relocate(featureName, .before = everything())
+   
+   # Will sum intensity of unique features.
+   x_data <- df %>%
+      pivot_wider(id_cols = "featureName", 
+                  names_from = "Run", 
+                  values_from = "Intensity",
+                  values_fn = sum) %>% 
+      as.data.frame() %>%
+      column_to_rownames(var = "featureName") %>% 
+      as.matrix()
+   
+   f_data <- df %>%
+      distinct(featureName, ProteinName, PeptideSequence) %>%
+      `rownames<-`(.[["featureName"]])
+   
+   p_data <- df %>%
+      distinct(Run) %>%
+      `rownames<-`(.[["Run"]])
+   
+   x_data <- x_data[rownames(f_data), rownames(p_data)]
+   
+   m <- MSnSet(exprs = x_data, fData = f_data, pData = p_data)
    
    return(m)
 }
