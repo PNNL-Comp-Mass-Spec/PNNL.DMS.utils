@@ -25,7 +25,9 @@ Imports:
    tibble,
    tidyr,
    utils,
-   RODBC
+   RODBC,
+   pbapply,
+   parallel
 Remotes:
    github::PNNL-Comp-Mass-Spec/MSnID@pnnl-master
 URL: 
