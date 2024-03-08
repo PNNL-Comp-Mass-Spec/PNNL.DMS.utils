@@ -54,7 +54,8 @@ get_datasets_by_data_package(data_package_num)
 download_datasets_by_data_package(
   data_package_num,
   copy_to = ".",
-  fileNamePttrn = ".raw"
+  fileNamePttrn = ".raw",
+  ncores = 2
 )
 
 get_results_for_multiple_jobs(jobRecords)
@@ -102,7 +103,9 @@ path_to_FASTA_used_by_DMS(data_package_num, organism_db = NULL)
 
 \item{data_package_num}{(integer) data package ID number.}
 
-\item{copy_to}{}
+\item{copy_to}{folder path to copy files into}
+
+\item{ncores}{number of cores to use in cluster}
 
 \item{jobRecords}{}
 

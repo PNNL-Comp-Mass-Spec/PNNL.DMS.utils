@@ -25,8 +25,7 @@ this if there is only one settings file associated with the jobs.}
 FASTA file associated with the jobs.}
 }
 \value{
-(MSnSet) MSnSet object of log2-transformed intensities. Rows have
-  been median-centered across samples.
+(MSnSet) MSnSet object of FragPipe LFQ results
 }
 \description{
 Function has only been tested with label-free intensity-based
