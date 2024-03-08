@@ -13,7 +13,6 @@ Imports:
    curl,
    data.table,
    dplyr,
-   lubridate,
    MSnbase,
    MSnID,
    odbc,
@@ -25,7 +24,6 @@ Imports:
    tibble,
    tidyr,
    utils,
-   RODBC,
    pbapply,
    parallel,
    MSnSet.utils
