@@ -29,7 +29,7 @@ Imports:
    MSnSet.utils
 Remotes:
    github::PNNL-Comp-Mass-Spec/MSnID@pnnl-master,
-   github::PNNL-Comp-Mass-Spec/MSnSet.utils@pnnl-master
+   github::PNNL-Comp-Mass-Spec/MSnSet.utils@master
 URL: 
    https://github.com/PNNL-Comp-Mass-Spec/PNNL.DMS.utils/
    https://pnnl-comp-mass-spec.github.io/PNNL.DMS.utils/
