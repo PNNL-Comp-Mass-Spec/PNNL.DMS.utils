@@ -334,8 +334,8 @@ download_datasets_by_data_package <- function(data_package_num,
       stop("Unknown OS type.")
    }
    multiproc_cl <- makeCluster(ncores)
+   on.exit(stopCluster(multiproc_cl))
    pbwalk(X = pathToFile$Folder, FUN = file.copy, cl = multiproc_cl, to = copy_to)
-   tryCatch(stopCluster(multiproc_cl))
 }
 
 
