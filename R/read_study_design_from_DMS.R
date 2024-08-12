@@ -22,7 +22,7 @@
 #' @param overwrite (logical) whether to replace any existing study design
 #'   tables when writing files.
 #'
-#' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult
+#' @importFrom DBI dbConnect dbSendQuery dbFetch dbClearResult
 #'   dbDisconnect
 #' @importFrom readr read_tsv cols
 #' @importFrom utils write.table
@@ -46,10 +46,8 @@
 path_to_study_design_from_DMS <- function(data_package_num,
                                           useHTTP = FALSE) 
 {
-  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
-                     get_driver(),
-                     get_auth())
-  con <- dbConnect(odbc(), .connection_string=con_str)
+
+  con <- get_db_connection()
   
   ## fetch table with path to DataPackage
   strSQL <- sprintf("
@@ -87,10 +85,8 @@ path_to_study_design_from_DMS <- function(data_package_num,
 read_study_design_from_DMS <- function(data_package_num,
                                        useHTTP = FALSE) 
 {
-  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
-                     get_driver(),
-                     get_auth())
-  con <- dbConnect(odbc(), .connection_string=con_str)
+
+  con <- get_db_connection()
   
   ## fetch table with path to DataPackage
   strSQL <- sprintf("

@@ -12,10 +12,11 @@ RoxygenNote: 7.3.1
 Imports:
    curl,
    data.table,
+   DBI,
    dplyr,
    MSnbase,
    MSnID,
-   odbc,
+   RPostgres,
    plyr,
    RCurl,
    readr,

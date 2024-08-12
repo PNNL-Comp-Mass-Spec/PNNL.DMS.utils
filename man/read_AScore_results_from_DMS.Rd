@@ -17,12 +17,14 @@ ascore (data.frame) AScore results
 This function read AScore results from a local folder.
 }
 \examples{
+\dontrun{
 if (is_PNNL_DMS_connection_successful()) {
   data_package_num <- 3625
   # msnid <- read_msgf_data_from_DMS(data_package_num) # Not run
   ascore <- read_AScore_results_from_DMS(data_package_num)
   # Use PlexedPiper to make use of the Ascore results
   # msnid <- PlexedPiper::best_PTM_location_by_ascore(msnid, ascore)
+}
 }
 
 }

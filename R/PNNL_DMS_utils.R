@@ -46,8 +46,8 @@
 #'   or not. Default is FALSE.
 #' @param ncores number of cores to use in cluster
 #'
-#' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult
-#'   dbDisconnect
+#' @importFrom DBI dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
+#' @importFrom RPostgres Postgres
 #' @importFrom plyr ldply
 #' @importFrom dplyr %>% rename filter select any_of mutate
 #' @importFrom tidyr unnest
@@ -113,16 +113,30 @@ get_auth <- function(){
 }
 
 
+get_db_connection <- function(
+    driver = Postgres,
+    driver_args = list(),
+    host = "prismdb2.emsl.pnl.gov",
+    user = "dmsreader",
+    password = "dms4fun",
+    dbname = "dms",
+    ...) {
+   driver_object <- do.call(driver, driver_args)
+   con <- dbConnect(driver_object,
+      host = host,
+      user = user,
+      password = password,
+      dbname = dbname,
+      ...
+   )
+   return(con)
+}
+
 #' @export
 #' @rdname pnnl_dms_utils
 is_PNNL_DMS_connection_successful <- function()
 {
-   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-                      get_driver(),
-                      get_auth())
-   
-   con_test_res <- try(con <- dbConnect(odbc(), .connection_string=con_str),
-                       TRUE)
+   con_test_res <- try(con <- get_db_connection(), TRUE)
    if(inherits(con_test_res, "try-error")){
       # no connection
       return(FALSE)
@@ -159,10 +173,7 @@ get_dms_job_records <- function(
    }
    
    # initialize connection
-   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-                      get_driver(),
-                      get_auth())
-   con <- dbConnect(odbc(), .connection_string=con_str)
+   con <- get_db_connection()
    
    # set-up query based on job list
    if(!is.null(jobs)){
@@ -236,7 +247,7 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Pipeline;%s",
                       get_driver(),
                       get_auth())
-   con <- dbConnect(odbc(), .connection_string=con_str)
+   con <- get_db_connection()
    strSQLPattern = "SELECT Output_Folder
    FROM V_Job_Steps_History
    WHERE (Job = %s) AND (Tool = '%s') AND (Most_Recent_Entry = 1)"
@@ -249,24 +260,7 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
 }
 
 
-# RODBC version
-# #' @export
-# #' @rdname pnnl_dms_utils
-# get_job_records_by_dataset_package <- function(data_package_num)
-# {
-#    con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-#                       get_driver(),
-#                       get_auth())
-#    con <- odbcDriverConnect(con_str)
-#    strSQL = sprintf("
-#                     SELECT *
-#                     FROM V_Mage_Data_Package_Analysis_Jobs
-#                     WHERE Data_Package_ID = %s",
-#                     data_package_num)
-#    jr <- sqlQuery(con, strSQL, stringsAsFactors=FALSE)
-#    close(con)
-#    return(jr)
-# }
+
 
 
 # odbc/DBI verson
@@ -274,10 +268,7 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
 #' @rdname pnnl_dms_utils
 get_job_records_by_dataset_package <- function(data_package_num)
 {
-   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-                      get_driver(),
-                      get_auth())
-   con <- dbConnect(odbc(), .connection_string=con_str)
+   con <- get_db_connection()
    strSQL <- sprintf("
                      SELECT *
                      FROM V_Mage_Data_Package_Analysis_Jobs
@@ -296,10 +287,7 @@ get_job_records_by_dataset_package <- function(data_package_num)
 #' @rdname pnnl_dms_utils
 get_datasets_by_data_package <- function(data_package_num)
 {
-   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-                      get_driver(),
-                      get_auth())
-   con <- dbConnect(odbc(), .connection_string=con_str)
+   con <- get_db_connection()
    strSQL <- sprintf("
                      SELECT *
                      FROM V_Mage_Data_Package_Datasets
@@ -533,11 +521,8 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
                      From V_Analysis_Job_Detail_Report_2
                      Where Job = %s", jobRecords$Job[1])
    
-   con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-                      get_driver(),
-                      get_auth())
    
-   con <- dbConnect(odbc(), .connection_string=con_str)
+   con <- get_db_connection()
    qry <- dbSendQuery(con, strSQL)
    res <- dbFetch(qry)
    dbClearResult(qry)
