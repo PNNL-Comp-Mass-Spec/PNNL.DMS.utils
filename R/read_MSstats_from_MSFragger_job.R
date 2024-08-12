@@ -44,7 +44,7 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
       PNNL.DMS.utils::get_job_records_by_dataset_package(data_package_num)
    
    # add filters on tool, parameter file and setting file
-   job_records <- filter(job_records, Tool == "MSFragger")
+   job_records <- filter(job_records, tool == "MSFragger")
    
    if (!is.null(param_file)) {
       job_records <- filter(job_records, Parameter_File == param_file)

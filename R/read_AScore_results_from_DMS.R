@@ -8,8 +8,9 @@
 #'
 #' @importFrom dplyr rename inner_join filter
 #' @importFrom readr read_tsv
-#' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult
+#' @importFrom DBI dbConnect dbSendQuery dbFetch dbClearResult
 #'   dbDisconnect
+#' @importFrom RPostgres Postgres
 #' @export read_AScore_results_from_DMS
 #'
 #' @examples
@@ -28,16 +29,13 @@ read_AScore_results_from_DMS <- function(data_package_num){
   # Prevent "no visible binding for global variable" note
   Dataset <- NULL
   
-  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=dms5;%s",
-                     get_driver(),
-                     get_auth())
-  con <- dbConnect(odbc(), .connection_string=con_str)
+  con <- get_db_connection()
   strSQL <- sprintf("SELECT *
-                     FROM V_Mage_Analysis_Jobs
-                     WHERE (Dataset LIKE 'DataPackage_%s%%')", data_package_num)
+                     FROM v_mage_analysis_jobs
+                     WHERE (dataset LIKE 'DataPackage_%s%%')", data_package_num)
   qry <- dbSendQuery(con, strSQL)
   job <- dbFetch(qry)
-  job <- dplyr::filter(job, Tool == "Phospho_FDR_Aggregator")
+  job <- dplyr::filter(job, tool == "Phospho_FDR_Aggregator")
   dbClearResult(qry)
   dbDisconnect(con)
   
@@ -54,7 +52,7 @@ read_AScore_results_from_DMS <- function(data_package_num){
       unlink(local_folder, recursive = T)
     }
     dir.create(local_folder)
-    remote_folder <- gsub("\\\\", "/", job['Folder'])
+    remote_folder <- gsub("\\\\", "/", job['folder'])
     mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
     system(mount_cmd)
     # read the stuff

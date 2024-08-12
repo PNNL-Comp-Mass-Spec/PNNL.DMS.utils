@@ -44,7 +44,7 @@ read_masic_data_from_DMS <- function(data_package_num,
       jobRecords <- get_job_records_by_dataset_package(data_package_num)
    }
    
-   jobRecords <- jobRecords[grepl("MASIC", jobRecords$Tool),]
+   jobRecords <- jobRecords[grepl("MASIC", jobRecords$tool),]
    
    # select relevant columns from df, drop redundant dataset column (select(-2))
    masicList <- get_results_for_multiple_jobs.dt(jobRecords)

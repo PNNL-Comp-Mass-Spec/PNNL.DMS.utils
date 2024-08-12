@@ -52,19 +52,15 @@ path_to_study_design_from_DMS <- function(data_package_num,
   ## fetch table with path to DataPackage
   strSQL <- sprintf("
                     SELECT *
-                    FROM V_Data_Package_Detail_Report
-                    WHERE ID = %s",
+                    FROM dpkg.v_data_package_detail_report
+                    WHERE id = %s",
                     data_package_num)
   qry <- dbSendQuery(con, strSQL)
   dataPkgReport <- dbFetch(qry)
   dbClearResult(qry)
   
   if(.Platform$OS.type == "unix" | useHTTP){
-    local_folder <- "~/temp_study_des"
-    if(file.exists(local_folder)){
-      unlink(local_folder, recursive = T)
-    }
-    dir.create(local_folder)
+    local_folder <- .new_tempdir()
     
     remote_folder <- gsub("\\\\","/", dataPkgReport$share_path)
     remote_folder <- gsub("(", "\\(", remote_folder, fixed = T)
@@ -91,8 +87,8 @@ read_study_design_from_DMS <- function(data_package_num,
   ## fetch table with path to DataPackage
   strSQL <- sprintf("
                     SELECT *
-                    FROM V_Data_Package_Detail_Report
-                    WHERE ID = %s",
+                    FROM dpkg.v_data_package_detail_report
+                    WHERE id = %s",
                     data_package_num)
   qry <- dbSendQuery(con, strSQL)
   dataPkgReport <- dbFetch(qry)
