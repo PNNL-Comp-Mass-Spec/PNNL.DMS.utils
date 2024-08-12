@@ -47,18 +47,18 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    job_records <- filter(job_records, tool == "MSFragger")
    
    if (!is.null(param_file)) {
-      job_records <- filter(job_records, Parameter_File == param_file)
+      job_records <- filter(job_records, parameter_file == param_file)
    }
    
    if (!is.null(settings_file)) {
-      job_records <- filter(job_records, Settings_File == settings_file)
+      job_records <- filter(job_records, settings_file == !!settings_file)
    }
    
    if (!is.null(organism_db)) {
-      job_records <- filter(job_records, Organism_DB == organism_db)
+      job_records <- filter(job_records, organism_db == !!organism_db)
    }
    
-   path <- unique(job_records$Folder)
+   path <- unique(job_records$folder)
    
    if (length(path) == 0) {
       stop("No jobs found.")

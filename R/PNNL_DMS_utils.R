@@ -223,7 +223,7 @@ get_tool_output_files_for_job_number <- function(jobNumber, toolName = NULL,
 {
    # get job records first. This will be useful to get dataset folder
    jobRecord <- get_dms_job_records(jobNumber)
-   datasetFolder <- dirname( as.character(jobRecord$Folder))
+   datasetFolder <- dirname(as.character(jobRecord$folder))
    
    # get tool's subfolder
    if( is.null(toolName) ){
@@ -325,7 +325,7 @@ download_datasets_by_data_package <- function(data_package_num,
    }
    multiproc_cl <- makeCluster(ncores)
    on.exit(stopCluster(multiproc_cl))
-   pbwalk(X = pathToFile$Folder, FUN = file.copy, cl = multiproc_cl, to = copy_to)
+   pbwalk(X = pathToFile$folder, FUN = file.copy, cl = multiproc_cl, to = copy_to)
 }
 
 
@@ -495,7 +495,7 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
    # make sure it was the same fasta used for all msgf jobs
    # at this point this works only with one data package at a time
    jobRecords <- get_job_records_by_dataset_package(data_package_num)
-   # jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
+   # jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$tool),]
    # if(length(unique(jobRecords$organism_db)) != 1){
    #    stop("There should be exactly one FASTA file per data package!")
    # }
@@ -556,6 +556,6 @@ path_to_FASTA_used_by_DMS <- function(data_package_num, organism_db = NULL)
 
 
 # Prevent "no visible binding for global variable" note.
-utils::globalVariables(c("Tool", "value"))
+utils::globalVariables(c("tool", "value"))
 
 

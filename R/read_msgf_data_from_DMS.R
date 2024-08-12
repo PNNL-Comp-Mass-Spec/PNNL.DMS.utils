@@ -47,11 +47,11 @@ read_msgf_data_from_DMS <- function(data_package_num,
     jobRecords <- get_job_records_by_dataset_package(data_package_num)
   }
   
-  jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$Tool),]
+  jobRecords <- jobRecords[grepl("MSGFPlus", jobRecords$tool),]
   
   # THIS PARAMETER ARGUMENT CHECK CAN BE MORE ELEGANT
   # Check parameter file. Is there any redundancy?
-  param_files <- unique(jobRecords$Parameter_File)
+  param_files <- unique(jobRecords$parameter_file)
   
   # Check if param_file is NULL
   if (is.null(param_file)) {
@@ -73,7 +73,7 @@ read_msgf_data_from_DMS <- function(data_package_num,
   }
   
   # FASTA files (organism_db)
-  organism_dbs <- unique(jobRecords$`Organism DB`)
+  organism_dbs <- unique(jobRecords$organism_db)
   
   # Check if organism_db is NULL
   if (is.null(organism_db)) {
@@ -95,11 +95,11 @@ read_msgf_data_from_DMS <- function(data_package_num,
   }
   
   # Subset to specific parameter file and FASTA file
-  jobRecords <- jobRecords[jobRecords$Parameter_File == param_file &
-                             jobRecords$`Organism DB` == organism_db, ]
+  jobRecords <- jobRecords[jobRecords$parameter_file == param_file &
+                             jobRecords$organism_db == organism_db, ]
   
   if (use_mzIdentML) {
-    mzid_files <- list.files(jobRecords$Folder, pattern = ".mzid.gz", 
+    mzid_files <- list.files(jobRecords$folder, pattern = ".mzid.gz", 
                              full.names = TRUE)
     
     # Read mzIdentML files into psms slot
@@ -110,7 +110,7 @@ read_msgf_data_from_DMS <- function(data_package_num,
     )
   } else {
     results <- get_results_for_multiple_jobs.dt(jobRecords) 
-    tool <- unique(jobRecords$Tool)
+    tool <- unique(jobRecords$tool)
     pattern <- tool2suffix[[tool]]
     results <- results[[pattern]]
     msnid <- convert_msgf_output_to_msnid(results)

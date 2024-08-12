@@ -60,7 +60,7 @@ read_msfragger_data_from_DMS <- function(data_package_num,
    
    path <- unique(job_records$folder)
    remote_folder <- gsub("\\\\", "/", path)
-   local_folder <- .new_tempdir()
+   mount_folder <- local_folder <- .new_tempdir()
    mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
    system(mount_cmd)
 
@@ -82,7 +82,7 @@ read_msfragger_data_from_DMS <- function(data_package_num,
       aggregate_zip_file <- file.path(local_folder, "Dataset_PSM_tsv.zip")
       exdir <- .new_tempdir()
       unzip(zipfile = aggregate_zip_file, list = FALSE, exdir = exdir)
-      path <- exdir
+      local_folder <- exdir
    }
    
    fileNamePttrn <- "_psm\\.tsv"
@@ -108,7 +108,7 @@ read_msfragger_data_from_DMS <- function(data_package_num,
              `Spectrum File` = sub("\\.pep\\.xml", "", `Spectrum File`),
              `Spectrum File` = sub(fileNamePttrn, "", `Spectrum File`))
    
-   system(glue::glue("umount {local_folder}"))
+   system(glue::glue("umount {mount_folder}"))
    
    if (!assume_inference) {
       dt <- dt %>%

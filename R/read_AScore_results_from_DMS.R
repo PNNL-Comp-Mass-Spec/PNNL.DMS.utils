@@ -67,9 +67,9 @@ read_AScore_results_from_DMS <- function(data_package_num){
   }else if(.Platform$OS.type == "windows"){
     # in case Windows
     ascores <- read_tsv(
-      file.path(job['Folder'],"Concatenated_msgfplus_syn_ascore.txt"))
+      file.path(job['folder'],"Concatenated_msgfplus_syn_ascore.txt"))
     job_to_dataset_map <- read_tsv(
-      file.path(job['Folder'], "Job_to_Dataset_Map.txt"))
+      file.path(job['folder'], "Job_to_Dataset_Map.txt"))
   }else{
     stop("unknown OS")
   }
@@ -82,5 +82,5 @@ read_AScore_results_from_DMS <- function(data_package_num){
 
 
 # Prevent "no visible binding for global variable" note.
-utils::globalVariables(c("Tool"))
+utils::globalVariables(c("tool"))
 
