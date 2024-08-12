@@ -26,7 +26,7 @@
 #' if (is_PNNL_DMS_connection_successful()) {
 #'   msnset <- read_MSstats_from_MSFragger_job(
 #'     data_package_num = 4938,
-#'     param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_StatCysAlk_20ppmParTol.params",
+#'     param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_Stat_CysAlk_20ppmParTol.params",
 #'     settings_file = "MSFragger_MatchBetweenRuns_Java80GB.xml",
 #'     organism_db = "ID_008026_7A1842EC.fasta")
 #'   show(msnset)
@@ -40,8 +40,7 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
                                             settings_file = NULL, 
                                             organism_db = NULL)
 {
-   job_records <- 
-      PNNL.DMS.utils::get_job_records_by_dataset_package(data_package_num)
+   job_records <- get_job_records_by_dataset_package(data_package_num)
    
    # add filters on tool, parameter file and setting file
    job_records <- filter(job_records, tool == "MSFragger")
@@ -59,7 +58,12 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    }
    
    path <- unique(job_records$folder)
-   
+   remote_folder <- gsub("\\\\", "/", path)
+   mount_folder <- local_folder <- .new_tempdir()
+   mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+   system(mount_cmd)
+   on.exit(system(glue::glue("umount {mount_folder}")))
+
    if (length(path) == 0) {
       stop("No jobs found.")
    }
@@ -69,8 +73,7 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
                   "Please refine the arguments to make sure they uniquely", 
                   " define the MSFragger job."))
    }
-   
-   path_to_file <- file.path(path, "MSstats.csv")
+   path_to_file <- file.path(local_folder, "MSstats.csv")
    
    if (!file.exists(path_to_file)) {
       stop(sprintf("MSstats.csv file not found in %s", path))

@@ -63,6 +63,7 @@ read_msfragger_data_from_DMS <- function(data_package_num,
    mount_folder <- local_folder <- .new_tempdir()
    mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
    system(mount_cmd)
+   on.exit(system(glue::glue("umount {mount_folder}")))
 
    if (length(path) == 0) {
       stop("No jobs found.")
@@ -108,7 +109,6 @@ read_msfragger_data_from_DMS <- function(data_package_num,
              `Spectrum File` = sub("\\.pep\\.xml", "", `Spectrum File`),
              `Spectrum File` = sub(fileNamePttrn, "", `Spectrum File`))
    
-   system(glue::glue("umount {mount_folder}"))
    
    if (!assume_inference) {
       dt <- dt %>%
