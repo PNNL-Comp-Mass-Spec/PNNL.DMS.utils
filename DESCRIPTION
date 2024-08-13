@@ -8,7 +8,7 @@ Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: Artistic-2.0
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports:
    curl,
    data.table,
@@ -16,18 +16,18 @@ Imports:
    dplyr,
    MSnbase,
    MSnID,
-   RPostgres,
+   MSnSet.utils,
+   parallel,
+   pbapply,
    plyr,
    RCurl,
    readr,
+   RPostgres,
    stats,
    stringr,
    tibble,
    tidyr,
-   utils,
-   pbapply,
-   parallel,
-   MSnSet.utils
+   utils
 Remotes:
    github::PNNL-Comp-Mass-Spec/MSnID@pnnl-master,
    github::PNNL-Comp-Mass-Spec/MSnSet.utils@master

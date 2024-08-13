@@ -17,6 +17,7 @@
 #'
 #' @md
 #'
+#' @importFrom glue glue
 #' @importFrom MSnID MSnID psms `psms<-`
 #' @importFrom data.table as.data.table `:=` setnames
 #' @importFrom readr read_tsv cols
@@ -63,7 +64,7 @@ read_msfragger_data_from_DMS <- function(data_package_num,
    mount_folder <- local_folder <- .new_tempdir()
    mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
    system(mount_cmd)
-   on.exit(system(glue::glue("umount {mount_folder}")))
+   on.exit(system(glue("umount {mount_folder}")))
 
    if (length(path) == 0) {
       stop("No jobs found.")

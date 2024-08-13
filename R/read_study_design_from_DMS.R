@@ -78,6 +78,7 @@ path_to_study_design_from_DMS <- function(data_package_num,
 
 #' @export
 #' @rdname read_study_design
+#' @importFrom glue glue
 read_study_design_from_DMS <- function(data_package_num,
                                        useHTTP = FALSE) 
 {
@@ -106,7 +107,7 @@ read_study_design_from_DMS <- function(data_package_num,
   # Files to search for
   file_paths <- file.path(
     dataPkgReport$web_path,
-    glue::glue("{names(required_cols)}.txt")
+    glue("{names(required_cols)}.txt")
   )
   
   names(file_paths) <- names(required_cols)

@@ -21,6 +21,7 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble column_to_rownames
 #' @importFrom dplyr %>% select filter distinct relocate everything
+#' @importFrom glue glue
 #'
 #' @examples
 #' if (is_PNNL_DMS_connection_successful()) {
@@ -62,7 +63,7 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    mount_folder <- local_folder <- .new_tempdir()
    mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
    system(mount_cmd)
-   on.exit(system(glue::glue("umount {mount_folder}")))
+   on.exit(system(glue("umount {mount_folder}")))
 
    if (length(path) == 0) {
       stop("No jobs found.")
