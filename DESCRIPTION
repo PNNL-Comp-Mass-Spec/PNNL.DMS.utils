@@ -14,6 +14,7 @@ Imports:
    data.table,
    DBI,
    dplyr,
+   glue,
    MSnbase,
    MSnID,
    MSnSet.utils,
