@@ -2,9 +2,6 @@ library(testthat)
 
 path_check <- function(path) {
     expect_true(grepl("Rtmp", path, ignore.case = FALSE))
-    if (.Platform$OS.type == "unix") {
-        system(glue::glue("umount {path}"))
-    }
 }
 # cat("1------\n")
 expect_true(is_PNNL_DMS_connection_successful())
