@@ -36,7 +36,7 @@ Function has only been tested with label-free intensity-based
 if (is_PNNL_DMS_connection_successful()) {
   msnset <- read_MSstats_from_MSFragger_job(
     data_package_num = 4938,
-    param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_StatCysAlk_20ppmParTol.params",
+    param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_Stat_CysAlk_20ppmParTol.params",
     settings_file = "MSFragger_MatchBetweenRuns_Java80GB.xml",
     organism_db = "ID_008026_7A1842EC.fasta")
   show(msnset)

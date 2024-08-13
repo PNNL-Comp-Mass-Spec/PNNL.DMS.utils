@@ -104,34 +104,10 @@ read_study_design_from_DMS <- function(data_package_num,
   )
   
   # Files to search for
-  study_design_files <- paste0("^", names(required_cols), ".txt$")
-  
-  
-  if(.Platform$OS.type == "unix" | useHTTP){
-    local_folder <- "~/temp_study_des"
-    
-    remote_folder <- gsub("\\\\","/", dataPkgReport$share_path)
-    remote_folder <- gsub("(", "\\(", remote_folder, fixed = TRUE)
-    remote_folder <- gsub(")", "\\)", remote_folder, fixed = TRUE)
-    
-    # Get paths to each of the study design tables
-    file_paths <- lapply(study_design_files, function(file_i) {
-      get_url_from_dir_and_file(remote_folder, file_i)
-    })
-    
-  } else if (.Platform$OS.type == "windows") {
-    local_folder <- dataPkgReport$share_path
-    
-    # Get paths to each of the study design tables
-    file_paths <- lapply(study_design_files, function(file_i) {
-      list.files(path = local_folder,
-                 pattern = file_i,
-                 full.names = TRUE)
-    })
-    
-  } else {
-    stop("Unknown OS type.")
-  }
+  file_paths <- file.path(
+    dataPkgReport$web_path,
+    glue::glue("{names(required_cols)}.txt")
+  )
   
   names(file_paths) <- names(required_cols)
   
