@@ -60,11 +60,6 @@ read_msfragger_data_from_DMS <- function(data_package_num,
    }
    
    path <- unique(job_records$folder)
-   remote_folder <- gsub("\\\\", "/", path)
-   mount_folder <- local_folder <- .new_tempdir()
-   mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
-   system(mount_cmd)
-   on.exit(system(glue("umount {mount_folder}")))
 
    if (length(path) == 0) {
       stop("No jobs found.")
@@ -76,21 +71,29 @@ read_msfragger_data_from_DMS <- function(data_package_num,
                   " define the MSFragger job."))
    }
    
+   if (.Platform$OS.type == "unix") {
+      remote_folder <- gsub("\\\\", "/", path)
+      mount_folder <- local_folder <- .new_tempdir()
+      mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+      system(mount_cmd)
+      on.exit(system(glue("umount {mount_folder}")))
+      path <- local_folder
+   }
    aggregate_zip_file_exists <- file.exists(
-      file.path(local_folder, "Dataset_PSM_tsv.zip"))
+      file.path(path, "Dataset_PSM_tsv.zip"))
    
    if (aggregate_zip_file_exists) {
       # Copy folder to temporary directory and extract psm files
-      aggregate_zip_file <- file.path(local_folder, "Dataset_PSM_tsv.zip")
+      aggregate_zip_file <- file.path(path, "Dataset_PSM_tsv.zip")
       exdir <- .new_tempdir()
       unzip(zipfile = aggregate_zip_file, list = FALSE, exdir = exdir)
-      local_folder <- exdir
+      path <- exdir
    }
    
    fileNamePttrn <- "_psm\\.tsv"
    # 
    # 
-   path_to_files <- list.files(local_folder, pattern = fileNamePttrn, full.names = TRUE)
+   path_to_files <- list.files(path, pattern = fileNamePttrn, full.names = TRUE)
    cn <- colnames(read_tsv(path_to_files[1], n_max = 1))
    
    # last_col <- which(cn == "Quan Usage") - 1

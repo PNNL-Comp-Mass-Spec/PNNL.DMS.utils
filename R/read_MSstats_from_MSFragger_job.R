@@ -59,22 +59,26 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    }
    
    path <- unique(job_records$folder)
-   remote_folder <- gsub("\\\\", "/", path)
-   mount_folder <- local_folder <- .new_tempdir()
-   mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
-   system(mount_cmd)
-   on.exit(system(glue("umount {mount_folder}")))
 
    if (length(path) == 0) {
       stop("No jobs found.")
    }
    
+   if (.Platform$OS.type == "unix") {
+      remote_folder <- gsub("\\\\", "/", path)
+      mount_folder <- local_folder <- .new_tempdir()
+      mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+      system(mount_cmd)
+      on.exit(system(glue("umount {mount_folder}")))
+      path <- local_folder
+   }
+
    if (length(path) > 1) {
       stop(paste0("More than one MSFragger search found per data package.\n", 
                   "Please refine the arguments to make sure they uniquely", 
                   " define the MSFragger job."))
    }
-   path_to_file <- file.path(local_folder, "MSstats.csv")
+   path_to_file <- file.path(path, "MSstats.csv")
    
    if (!file.exists(path_to_file)) {
       stop(sprintf("MSstats.csv file not found in %s", path))
@@ -84,9 +88,6 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    
    return(m)
 }
-
-
-
 
 utils::globalVariables(
    c("Parameter_File", "Settings_File", "Organism_DB", "ProteinName",

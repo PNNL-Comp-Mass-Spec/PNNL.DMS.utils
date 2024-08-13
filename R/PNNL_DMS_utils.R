@@ -112,7 +112,7 @@ get_auth <- function(){
    }
 }
 
-
+#' @importFrom RPostgres Postgres
 get_db_connection <- function(
     driver = Postgres,
     driver_args = list(),

@@ -43,8 +43,7 @@
  
 #' @export
 #' @rdname read_study_design
-path_to_study_design_from_DMS <- function(data_package_num,
-                                          useHTTP = FALSE) 
+path_to_study_design_from_DMS <- function(data_package_num) 
 {
 
   con <- get_db_connection()
@@ -59,7 +58,7 @@ path_to_study_design_from_DMS <- function(data_package_num,
   dataPkgReport <- dbFetch(qry)
   dbClearResult(qry)
   
-  if(.Platform$OS.type == "unix" | useHTTP){
+  if(.Platform$OS.type == "unix"){
     local_folder <- .new_tempdir()
     
     remote_folder <- gsub("\\\\","/", dataPkgReport$share_path)
