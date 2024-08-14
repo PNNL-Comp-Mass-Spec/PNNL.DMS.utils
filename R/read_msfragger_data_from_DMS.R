@@ -17,6 +17,7 @@
 #'
 #' @md
 #'
+#' @importFrom glue glue
 #' @importFrom MSnID MSnID psms `psms<-`
 #' @importFrom data.table as.data.table `:=` setnames
 #' @importFrom readr read_tsv cols
@@ -39,27 +40,27 @@ read_msfragger_data_from_DMS <- function(data_package_num,
                                          organism_db = NULL,
                                          assume_inference = FALSE)
 {
-   on.exit(unlink(tempdir()))
+   # on.exit(unlink(tempdir()))
    
    job_records <- get_job_records_by_dataset_package(data_package_num)
    
    # add filters on tool, parameter file and setting file
-   job_records <- filter(job_records, Tool == "MSFragger")
+   job_records <- filter(job_records, tool == "MSFragger")
    
    if (!is.null(param_file)) {
-      job_records <- filter(job_records, Parameter_File == param_file)
+      job_records <- filter(job_records, parameter_file == param_file)
    }
    
    if (!is.null(settings_file)) {
-      job_records <- filter(job_records, Settings_File == settings_file)
+      job_records <- filter(job_records, settings_file == !!settings_file)
    }
    
    if (!is.null(organism_db)) {
-      job_records <- filter(job_records, Organism_DB == organism_db)
+      job_records <- filter(job_records, organism_db == !!organism_db)
    }
    
-   path <- unique(job_records$Folder)
-   
+   path <- unique(job_records$folder)
+
    if (length(path) == 0) {
       stop("No jobs found.")
    }
@@ -70,19 +71,31 @@ read_msfragger_data_from_DMS <- function(data_package_num,
                   " define the MSFragger job."))
    }
    
+   if (.Platform$OS.type == "unix") {
+      remote_folder <- gsub("\\\\", "/", path)
+      mount_folder <- local_folder <- .new_tempdir()
+      mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+      system(mount_cmd)
+      on.exit(system(glue("umount {mount_folder}")))
+      path <- local_folder
+   }
    aggregate_zip_file_exists <- file.exists(
       file.path(path, "Dataset_PSM_tsv.zip"))
    
    if (aggregate_zip_file_exists) {
       # Copy folder to temporary directory and extract psm files
       aggregate_zip_file <- file.path(path, "Dataset_PSM_tsv.zip")
-      unzip(zipfile = aggregate_zip_file, list = FALSE, exdir = tempdir())
-      path <- tempdir()
+      exdir <- .new_tempdir()
+      unzip(zipfile = aggregate_zip_file, list = FALSE, exdir = exdir)
+      path <- exdir
    }
    
    fileNamePttrn <- "_psm\\.tsv"
+   # 
+   # 
    path_to_files <- list.files(path, pattern = fileNamePttrn, full.names = TRUE)
    cn <- colnames(read_tsv(path_to_files[1], n_max = 1))
+   
    # last_col <- which(cn == "Quan Usage") - 1
    keep_cols <- c("Spectrum", "Spectrum File", "Protein", "Mapped Proteins",
                   "Charge", "Calculated M/Z", "Calibrated Observed M/Z",
@@ -99,6 +112,7 @@ read_msfragger_data_from_DMS <- function(data_package_num,
              `Spectrum File` = sub("interact-", "", `Spectrum File`),
              `Spectrum File` = sub("\\.pep\\.xml", "", `Spectrum File`),
              `Spectrum File` = sub(fileNamePttrn, "", `Spectrum File`))
+   
    
    if (!assume_inference) {
       dt <- dt %>%

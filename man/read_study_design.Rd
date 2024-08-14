@@ -7,7 +7,7 @@
 \alias{write_study_design_to_DMS}
 \title{Reading and Writing Study Design Tables}
 \usage{
-path_to_study_design_from_DMS(data_package_num, useHTTP = FALSE)
+path_to_study_design_from_DMS(data_package_num)
 
 read_study_design_from_DMS(data_package_num, useHTTP = FALSE)
 

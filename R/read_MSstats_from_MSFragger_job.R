@@ -21,12 +21,13 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble column_to_rownames
 #' @importFrom dplyr %>% select filter distinct relocate everything
+#' @importFrom glue glue
 #'
 #' @examples
 #' if (is_PNNL_DMS_connection_successful()) {
 #'   msnset <- read_MSstats_from_MSFragger_job(
 #'     data_package_num = 4938,
-#'     param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_StatCysAlk_20ppmParTol.params",
+#'     param_file = "MSFragger_Tryp_Dyn_MetOx_ProtNTermAcet_Stat_CysAlk_20ppmParTol.params",
 #'     settings_file = "MSFragger_MatchBetweenRuns_Java80GB.xml",
 #'     organism_db = "ID_008026_7A1842EC.fasta")
 #'   show(msnset)
@@ -40,36 +41,43 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
                                             settings_file = NULL, 
                                             organism_db = NULL)
 {
-   job_records <- 
-      PNNL.DMS.utils::get_job_records_by_dataset_package(data_package_num)
+   job_records <- get_job_records_by_dataset_package(data_package_num)
    
    # add filters on tool, parameter file and setting file
-   job_records <- filter(job_records, Tool == "MSFragger")
+   job_records <- filter(job_records, tool == "MSFragger")
    
    if (!is.null(param_file)) {
-      job_records <- filter(job_records, Parameter_File == param_file)
+      job_records <- filter(job_records, parameter_file == param_file)
    }
    
    if (!is.null(settings_file)) {
-      job_records <- filter(job_records, Settings_File == settings_file)
+      job_records <- filter(job_records, settings_file == !!settings_file)
    }
    
    if (!is.null(organism_db)) {
-      job_records <- filter(job_records, Organism_DB == organism_db)
+      job_records <- filter(job_records, organism_db == !!organism_db)
    }
    
-   path <- unique(job_records$Folder)
-   
+   path <- unique(job_records$folder)
+
    if (length(path) == 0) {
       stop("No jobs found.")
    }
    
+   if (.Platform$OS.type == "unix") {
+      remote_folder <- gsub("\\\\", "/", path)
+      mount_folder <- local_folder <- .new_tempdir()
+      mount_cmd <- sprintf("mount -t smbfs %s %s", remote_folder, local_folder)
+      system(mount_cmd)
+      on.exit(system(glue("umount {mount_folder}")))
+      path <- local_folder
+   }
+
    if (length(path) > 1) {
       stop(paste0("More than one MSFragger search found per data package.\n", 
                   "Please refine the arguments to make sure they uniquely", 
                   " define the MSFragger job."))
    }
-   
    path_to_file <- file.path(path, "MSstats.csv")
    
    if (!file.exists(path_to_file)) {
@@ -80,9 +88,6 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    
    return(m)
 }
-
-
-
 
 utils::globalVariables(
    c("Parameter_File", "Settings_File", "Organism_DB", "ProteinName",

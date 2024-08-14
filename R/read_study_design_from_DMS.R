@@ -22,7 +22,7 @@
 #' @param overwrite (logical) whether to replace any existing study design
 #'   tables when writing files.
 #'
-#' @importFrom odbc odbc dbConnect dbSendQuery dbFetch dbClearResult
+#' @importFrom DBI dbConnect dbSendQuery dbFetch dbClearResult
 #'   dbDisconnect
 #' @importFrom readr read_tsv cols
 #' @importFrom utils write.table
@@ -43,30 +43,23 @@
  
 #' @export
 #' @rdname read_study_design
-path_to_study_design_from_DMS <- function(data_package_num,
-                                          useHTTP = FALSE) 
+path_to_study_design_from_DMS <- function(data_package_num) 
 {
-  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
-                     get_driver(),
-                     get_auth())
-  con <- dbConnect(odbc(), .connection_string=con_str)
+
+  con <- get_db_connection()
   
   ## fetch table with path to DataPackage
   strSQL <- sprintf("
                     SELECT *
-                    FROM V_Data_Package_Detail_Report
-                    WHERE ID = %s",
+                    FROM dpkg.v_data_package_detail_report
+                    WHERE id = %s",
                     data_package_num)
   qry <- dbSendQuery(con, strSQL)
   dataPkgReport <- dbFetch(qry)
   dbClearResult(qry)
   
-  if(.Platform$OS.type == "unix" | useHTTP){
-    local_folder <- "~/temp_study_des"
-    if(file.exists(local_folder)){
-      unlink(local_folder, recursive = T)
-    }
-    dir.create(local_folder)
+  if(.Platform$OS.type == "unix"){
+    local_folder <- .new_tempdir()
     
     remote_folder <- gsub("\\\\","/", dataPkgReport$share_path)
     remote_folder <- gsub("(", "\\(", remote_folder, fixed = T)
@@ -84,19 +77,18 @@ path_to_study_design_from_DMS <- function(data_package_num,
 
 #' @export
 #' @rdname read_study_design
+#' @importFrom glue glue
 read_study_design_from_DMS <- function(data_package_num,
                                        useHTTP = FALSE) 
 {
-  con_str <- sprintf("DRIVER={%s};SERVER=gigasax;DATABASE=DMS_Data_Package;%s",
-                     get_driver(),
-                     get_auth())
-  con <- dbConnect(odbc(), .connection_string=con_str)
+
+  con <- get_db_connection()
   
   ## fetch table with path to DataPackage
   strSQL <- sprintf("
                     SELECT *
-                    FROM V_Data_Package_Detail_Report
-                    WHERE ID = %s",
+                    FROM dpkg.v_data_package_detail_report
+                    WHERE id = %s",
                     data_package_num)
   qry <- dbSendQuery(con, strSQL)
   dataPkgReport <- dbFetch(qry)
@@ -112,34 +104,10 @@ read_study_design_from_DMS <- function(data_package_num,
   )
   
   # Files to search for
-  study_design_files <- paste0("^", names(required_cols), ".txt$")
-  
-  
-  if(.Platform$OS.type == "unix" | useHTTP){
-    local_folder <- "~/temp_study_des"
-    
-    remote_folder <- gsub("\\\\","/", dataPkgReport$share_path)
-    remote_folder <- gsub("(", "\\(", remote_folder, fixed = TRUE)
-    remote_folder <- gsub(")", "\\)", remote_folder, fixed = TRUE)
-    
-    # Get paths to each of the study design tables
-    file_paths <- lapply(study_design_files, function(file_i) {
-      get_url_from_dir_and_file(remote_folder, file_i)
-    })
-    
-  } else if (.Platform$OS.type == "windows") {
-    local_folder <- dataPkgReport$share_path
-    
-    # Get paths to each of the study design tables
-    file_paths <- lapply(study_design_files, function(file_i) {
-      list.files(path = local_folder,
-                 pattern = file_i,
-                 full.names = TRUE)
-    })
-    
-  } else {
-    stop("Unknown OS type.")
-  }
+  file_paths <- file.path(
+    dataPkgReport$web_path,
+    glue("{names(required_cols)}.txt")
+  )
   
   names(file_paths) <- names(required_cols)
   
