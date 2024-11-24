@@ -79,7 +79,8 @@ tool2suffix <- list("MSGFPlus"               = "_msgfplus_syn.txt",
                                                  "_ScanStatsEx.txt",
                                                  "_SICstats.txt"),
                     "TopPIC"                 = c("_TopPIC_PrSMs.txt",
-                                                 "_ms1.feature"))
+                                                 "_ms1.feature"),
+                    "Decon2LS_V2"            = "_isos.csv")
 
 # link_min <- function(scan2,scan3){
 #    if (scan3 > scan2){
