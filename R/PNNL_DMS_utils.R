@@ -471,8 +471,13 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn, expected_mu
    
    short_dataset_names <- unlist(strsplit(basename(pathToFile), 
                                           split = fileNamePttrn))
+   
+   read_fun <- read_tsv
+   if(grepl(".csv$", pathToFile))
+      read_fun <- read_csv
+   
    out <- llply(pathToFile, 
-                read_tsv,
+                read_fun,
                 col_types = readr::cols(),
                 guess_max = Inf,
                 progress = FALSE) %>%
