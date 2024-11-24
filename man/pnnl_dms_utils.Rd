@@ -19,7 +19,7 @@
 \alias{path_to_FASTA_used_by_DMS}
 \title{Utilities for interacting with PNNL DMS}
 \format{
-An object of class \code{list} of length 7.
+An object of class \code{list} of length 8.
 }
 \usage{
 tool2suffix
