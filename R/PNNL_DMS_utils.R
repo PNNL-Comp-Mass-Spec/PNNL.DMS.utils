@@ -473,23 +473,6 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn, expected_mu
    short_dataset_names <- unlist(strsplit(basename(pathToFile), 
                                           split = fileNamePttrn))
    
-   # read_fun <- read_tsv
-   # csv_grepls <- grepl(".csv$", pathToFile)
-   # if(sum(csv_grepls) > 0)
-   #    if (sum(csv_grepls) < length(csv_grepls)) {
-   #       stop(paste("In `get_results_for_single_job.dt`, the number of csv ",
-   #       "files was greater than zero but not the number of paths provided ",
-   #       "in `pathToFile`. The number of csv files must be zero or the length ",
-   #       "of `pathToFile`."))
-   #    }
-   #    read_fun <- read_tsv
-   
-   # read_delims <- sapply(pathToFile, reader::get.delim)
-   # if (length(unique(read_delims) > 1)) {
-   #    stop(sprintf("There were more than 1 unique delimeters detected in `pathToFile` files: %s", unique(read_delims)))
-   # }
-   # message(sprintf("Detected files with delimeter \"%s\".", read_delims[[1]]))
-   
       out <- llply(pathToFile, 
                 fread,
                 colClasses = readr::cols(),
