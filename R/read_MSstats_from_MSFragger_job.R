@@ -17,7 +17,7 @@
 #'
 #' @importFrom MSnbase MSnSet
 #' @importFrom MSnSet.utils read_FragPipe_LFQ
-#' @importFrom data.table fread
+#' @importFrom reader get.delim
 #' @importFrom tidyr pivot_wider
 #' @importFrom tibble column_to_rownames
 #' @importFrom dplyr %>% select filter distinct relocate everything
@@ -36,7 +36,7 @@
 #' @export read_MSstats_from_MSFragger_job
 
 
-read_MSstats_from_MSFragger_job <- function(data_package_num, 
+read_MSstats_from_MSFragger_job <- function(data_package_num,  # nolint
                                             param_file = NULL, 
                                             settings_file = NULL, 
                                             organism_db = NULL)
@@ -45,6 +45,8 @@ read_MSstats_from_MSFragger_job <- function(data_package_num,
    
    # add filters on tool, parameter file and setting file
    job_records <- filter(job_records, tool == "MSFragger")
+
+   parameter_file <- NULL # To avoid undefined warning
    
    if (!is.null(param_file)) {
       job_records <- filter(job_records, parameter_file == param_file)

@@ -22,6 +22,8 @@ Imports:
    plyr,
    RCurl,
    readr,
+   reader,
+   R.utils,
    RPostgres,
    stats,
    stringr,

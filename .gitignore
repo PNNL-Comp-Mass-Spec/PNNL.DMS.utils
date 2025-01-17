@@ -6,3 +6,4 @@
 .Rbuildignore
 .DS_Store
 PlexedPiper.Rproj
+.vscode/
