@@ -95,37 +95,26 @@ tool2suffix <- list("MSGFPlus"               = "_msgfplus_syn.txt",
 
 #' @importFrom reader get.delim
 #' @importFrom R.utils countLines
-.get.delim2 <- function(delim_filename, n_samples = 250) {
-   n_lines <- countLines(delim_filename)
-   top_delim <- sort(
-      table(
-         sapply(
-            sample(seq_len(n_lines), n_samples, replace = T),
-            function(x) {
-               get.delim(delim_filename, n = x)
-            }
-         )
-      ),
-      decreasing = T
-   )
-   if (length(top_delim) == 0) {
-      stop(sprintf("No delimiters found when trying to read %s", delim_filename))
-   }
-   if (top_delim[1] != n_lines) {
+.get.delim2 <- function(delim_filename, n_samples = NULL) {
+   line_one_delim <- get.delim(delim_filename, n = 1)
+   ten_line_delim <- get.delim(delim_filename, n = 10)
+
+   if (line_one_delim != ten_line_delim) {
       warning(
          sprintf(
             paste(
-               "Delimiter for file %s%s is ambiguous (although this is fairly common).",
-               "Using the most common delimiter: %s\n",
+               "In `.get.delim21: Delimiter for file %s%s is ambiguous",
+               "(although this is fairly common).",
+               "Using the first-line delimiter: \"%s\"\n",
                "If downstream issues are encountered, this may be the culprit."
             ),
-            stringr::str_sub(delim_filename, 1, 10),
-            ifelse(stringr::str_length(delim_filename) < 10, "", "..."),
-            names(top_delim)[1]
+            stringr::str_sub(delim_filename, 1, 25),
+            ifelse(stringr::str_length(delim_filename) < 25, "", "...etc."),
+            line_one_delim
          )
       )
    }
-   return(names(top_delim)[1])
+   return(line_one_delim)
 }
 
 get_driver <- function(){
@@ -506,13 +495,14 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn, expected_mu
    
    short_dataset_names <- unlist(strsplit(basename(pathToFile), 
                                           split = fileNamePttrn))
-      delims <- lapply(pathToFile, .get.delim2)
-      args <- data.frame(file = pathToFile, sep = delims)
+      delims <- unname(sapply(pathToFile, .get.delim2))
+      args <- data.frame(file = pathToFile, delim = delims)
       out <- mlply(args, 
                 read_delim,
                 col_types = readr::cols(),
                 guess_max = Inf,
-                progress = FALSE) %>%
+                progress = FALSE,
+                trim_ws=TRUE) %>%
       #lapply(function(xi) { dplyr::select(xi, -one_of("Dataset"))}) %>%
       # map(dplyr::select, -any_of("Dataset")) %>%
       lapply(function(xi) dplyr::select(xi, -any_of("Dataset"))) %>% 
