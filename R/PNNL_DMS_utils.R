@@ -48,11 +48,11 @@
 #'
 #' @importFrom DBI dbConnect dbSendQuery dbFetch dbClearResult dbDisconnect
 #' @importFrom RPostgres Postgres
-#' @importFrom plyr ldply
+#' @importFrom plyr ldply llply mlply
 #' @importFrom dplyr %>% rename filter select any_of mutate
 #' @importFrom tidyr unnest
 #' @importFrom tibble enframe
-#' @importFrom readr read_tsv
+#' @importFrom readr read_tsv read_delim
 #' @importFrom data.table data.table rbindlist
 #' @importFrom utils read.delim tail download.file
 #' @importFrom stringr str_match_all str_match str_replace_all str_replace
@@ -92,6 +92,29 @@ tool2suffix <- list("MSGFPlus"               = "_msgfplus_syn.txt",
 # }
 # 
 # link_min_vectorized <- Vectorize(link_min)
+
+#' @importFrom reader get.delim
+#' @importFrom R.utils countLines
+.get.delim2 <- function(delim_filename, n_samples = NULL) {
+   line_one_delim <- get.delim(delim_filename, n = 1, delims = c("\t", ","))
+   ten_line_delim <- get.delim(delim_filename, n = 10, delims = c("\t", ","))
+
+   if (line_one_delim != ten_line_delim) {
+      warning(
+         sprintf(
+            paste(
+               "In `.get.delim2`: Delimiter for file %s is ambiguous",
+               "(although this is fairly common).",
+               "Using the first-line delimiter:%s\n",
+               "If downstream issues are encountered, this may be the culprit."
+            ),
+            delim_filename,
+            ifelse(line_one_delim == "\t", "\\t", line_one_delim)
+         )
+      )
+   }
+   return(line_one_delim)
+}
 
 get_driver <- function(){
    if(.Platform$OS.type == "unix"){
@@ -266,7 +289,7 @@ get_output_folder_for_job_and_tool <- function(jobNumber, toolName, mostRecent=T
 
 
 
-# odbc/DBI verson
+# odbc/DBI version
 #' @export
 #' @rdname pnnl_dms_utils
 get_job_records_by_dataset_package <- function(data_package_num)
@@ -419,8 +442,8 @@ get_url_from_dir_and_file <- function(dir, file_name_segment) {
    file_name_regex <- paste(">([^\\/]*", file_name_pattern_escaped, "[^\\/]*)<", sep = "")
    file_name <- str_match(dir_listing_str, file_name_regex)[, -1]
    if(is.na(file_name)){
-      first_part_of_filnme <- sub(".*\\/([^\\/]+)\\/[^\\/]*$", "\\1", dir_url)
-      file_name <- paste(first_part_of_filnme, file_name_segment, sep = "")
+      first_part_of_filename <- sub(".*\\/([^\\/]+)\\/[^\\/]*$", "\\1", dir_url)
+      file_name <- paste(first_part_of_filename, file_name_segment, sep = "")
    }
    
    complete_url <- paste(dir_url, "/", file_name, sep = "")
@@ -471,16 +494,14 @@ get_results_for_single_job.dt <- function(pathToFile, fileNamePttrn, expected_mu
    
    short_dataset_names <- unlist(strsplit(basename(pathToFile), 
                                           split = fileNamePttrn))
-   
-   read_fun <- read_tsv
-   if(grepl(".csv$", pathToFile))
-      read_fun <- read_csv
-   
-   out <- llply(pathToFile, 
-                read_fun,
+      delims <- unname(sapply(pathToFile, .get.delim2))
+      args <- data.frame(file = pathToFile, delim = delims)
+      out <- mlply(args, 
+                read_delim,
                 col_types = readr::cols(),
                 guess_max = Inf,
-                progress = FALSE) %>%
+                progress = FALSE,
+                trim_ws=TRUE) %>%
       #lapply(function(xi) { dplyr::select(xi, -one_of("Dataset"))}) %>%
       # map(dplyr::select, -any_of("Dataset")) %>%
       lapply(function(xi) dplyr::select(xi, -any_of("Dataset"))) %>% 

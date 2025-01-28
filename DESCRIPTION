@@ -1,7 +1,7 @@
 Package: PNNL.DMS.utils
 Type: Package
 Title: Tools for accessing PNNL's Data Management System
-Version: 0.4.0
+Version: 0.6.0
 Author: Vladislav Petyuk, Michael Nestor, Shane Kelly, Tyler Sagendorf, Ben Drucker, Jamie Moon, Camilo Posso, Matthew Monroe, David JM
 Maintainer: Vladislav Petyuk <vladislav.petyuk@pnnl.gov>
 Description: Tools for accessing PNNL's Data Management System, including accessing the PostgreSQL database
@@ -22,6 +22,8 @@ Imports:
    plyr,
    RCurl,
    readr,
+   reader,
+   R.utils,
    RPostgres,
    stats,
    stringr,
