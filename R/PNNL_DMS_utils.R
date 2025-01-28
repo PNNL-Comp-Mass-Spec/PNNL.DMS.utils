@@ -96,21 +96,20 @@ tool2suffix <- list("MSGFPlus"               = "_msgfplus_syn.txt",
 #' @importFrom reader get.delim
 #' @importFrom R.utils countLines
 .get.delim2 <- function(delim_filename, n_samples = NULL) {
-   line_one_delim <- get.delim(delim_filename, n = 1)
-   ten_line_delim <- get.delim(delim_filename, n = 10)
+   line_one_delim <- get.delim(delim_filename, n = 1, delims = c("\t", ","))
+   ten_line_delim <- get.delim(delim_filename, n = 10, delims = c("\t", ","))
 
    if (line_one_delim != ten_line_delim) {
       warning(
          sprintf(
             paste(
-               "In `.get.delim21: Delimiter for file %s%s is ambiguous",
+               "In `.get.delim2`: Delimiter for file %s is ambiguous",
                "(although this is fairly common).",
-               "Using the first-line delimiter: \"%s\"\n",
+               "Using the first-line delimiter:%s\n",
                "If downstream issues are encountered, this may be the culprit."
             ),
-            stringr::str_sub(delim_filename, 1, 25),
-            ifelse(stringr::str_length(delim_filename) < 25, "", "...etc."),
-            line_one_delim
+            delim_filename,
+            ifelse(line_one_delim == "\t", "\\t", line_one_delim)
          )
       )
    }
